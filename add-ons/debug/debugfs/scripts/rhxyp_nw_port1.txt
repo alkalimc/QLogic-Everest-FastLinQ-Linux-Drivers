@@ -1,0 +1,6 @@
+reset 0 0 0 0
+set_nw_output 1 0x0050C22C 0x719C 0 0 0
+enable_storm x rh
+enable_storm y rh
+enable_storm p rh
+start

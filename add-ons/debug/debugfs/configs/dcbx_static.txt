@@ -1,0 +1,4 @@
+dcbx mode
+---------
+mode static (16)
+

@@ -1,0 +1,88 @@
+
+                Installation Notes
+
+                QLogic Corporation
+        QLogic Everest FastLinQ Linux Drivers
+        Copyright (c) 2015-2017 QLogic Corporation
+        Copyright (c) 2016-2017 Cavium Inc.
+
+
+Table of Contents
+=================
+
+  Introduction
+  Installation of Kernel Drivers
+  Loading and Removing Kernel Drivers
+  Installation of Userspace Driver
+
+
+Introduction
+============
+
+This file describes the installation procedures for the following QLogic Linux
+drivers:
+
+- QED (QLogic Everest Driver) core module for QL4xxx Series converged network
+  interface cards.
+
+- QEDE (Qlogic Everest Driver for Ethernet) networking driver for QL4xxx Series
+  converged network interface cards.
+
+- QEDR (QLogic Everest Driver for RoCE) driver for QL4xxx series of converged
+  network interface cards.
+
+- LIBQEDR (QLogic Everest Library for RoCE) userspace driver for QL4xxx series
+  of converged network interface cards.
+
+- QEDF (QLogic Everest Driver for FoCE) driver for QL4xxx series of converged
+  network interface cards.
+
+- QEDI (QLogic Everest Driver for iSCSI) driver for QL4xxx series of converged
+  network interface cards.
+
+Installation of Kernel Drivers
+==============================
+
+1. Create a directory and extract the FastLinQ package files:
+
+   `tar xvjf fastlinq-<version>.tar.bz2'
+
+2. Change to the recently created directory:
+
+   `cd fastlinq-<version>'
+
+3. Build and install the kernel drivers as loadable modules for the running
+   kernel:
+
+   `make install'
+
+
+Loading and Removing Kernel Drivers
+===================================
+
+- Loading a kernel driver:
+
+  `modprobe <qed/qede/qedr/qedf/qedi>'
+
+  Due to dependency between the drivers, probing of QEDE will probe also QED,
+  and probing of QEDR will probe also QEDE and QED.
+
+- Removing a kernel driver:
+
+  `rmmod <qedi/qedf/qedr/qede/qed>'
+
+
+Installation of Userspace Driver
+================================
+
+1. Create a directory and extract the FastLinQ package files:
+
+   `tar xvjf fastlinq-<version>.tar.bz2'
+
+2. Change to the recently created directory:
+
+   `cd fastlinq-<version>'
+
+3. Build and install the LIBQEDR userspace library:
+
+   `make libqedr_install'

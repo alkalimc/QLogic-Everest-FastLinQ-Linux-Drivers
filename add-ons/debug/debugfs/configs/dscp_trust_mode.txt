@@ -1,0 +1,14 @@
+dscp pfc
+--------
+dscp_pfc enabled(1)
+
+dscp to priority mapping
+------------------------
+dscp  0..7    prios  0  0  0  0  0  0  0  0
+dscp  8..15   prios  1  1  1  1  1  1  1  1
+dscp  16..23  prios  2  2  2  2  2  2  2  2
+dscp  24..31  prios  3  3  3  3  3  3  3  3
+dscp  32..39  prios  4  4  4  4  4  4  4  4
+dscp  40..47  prios  5  5  5  5  5  5  5  5
+dscp  48..55  prios  6  6  6  6  6  6  6  6
+dscp  56..63  prios  7  7  7  7  7  7  7  7

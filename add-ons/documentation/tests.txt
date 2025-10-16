@@ -1,0 +1,152 @@
+Testing LED mode
+-----------------
+-----------------
+
+set_led
+--------
+Sets the port LED state. The command is used for testing the LED functionality,
+mimicking the LED blink etc.
+At the end of the tests, user must restore the LED state (that is using
+QED_LED_MODE_RESTORE) for correct functioning of the port's LED feature. 
+
+Inputs: 
+	The input parameter is defined by 'enum qed_led_mode'.
+	0 (QED_LED_MODE_OFF) - Turn off the LED
+	1 (QED_LED_MODE_ON) - Turn on the LED
+	2 (QED_LED_MODE_RESTORE) - Restore the LED state (Let MFW control the LED
+				   i.e., blink when traffic is present)
+Outputs:
+	command status - 0 for success
+	
+Example: Switch off the LED light for 5 seconds, followed by ON for 5 seconds.
+	# echo set_led 0  >   /sys/kernel/debug/qed/04\:00.0/tests
+	# sleep 5
+	# echo set_led 1  >   /sys/kernel/debug/qed/04\:00.0/tests
+	# sleep 5
+	# echo set_led 2  >   /sys/kernel/debug/qed/04\:00.0/tests
+
+NVM_CONFIG attributes
+---------------------
+---------------------
+MFW provides hsi/interfaces for reading/updating the nvm configuration. 
+nvm_get_cfg/nvm_set_cfg are the debugfs interfaces for this nvm access.
+
+nvm_get_cfg_len
+---------------
+The command is used for reading the length of nvm config attribute.
+
+Inputs: 
+	Option id     - CFG_ID value defined by nvm_cfg.h e.g., NVM_CFG_ID_MAC_ADDRESS
+
+Outputs:
+	NVM config attriubte length.
+
+nvm_get_cfg
+-----------
+The command is used for reading the nvm config attribute.
+
+Inputs: 
+	Option id     - CFG_ID value defined by nvm_cfg.h e.g., NVM_CFG_ID_MAC_ADDRESS
+	Entity id     - PF number. Valid only when entity-select config flag is set i.e.,
+			QED_NVM_CFG_OPTION_ENTITY_SEL.
+	config flags  - One or more config flags i.e., QED_NVM_CFG_OPTION_*.
+	offset        - Offset into the nvm-config attribute buffer.
+
+Outputs:
+	NVM config attriubte value.
+
+nvm_set_cfg
+-----------
+The command is used for updating the nvm config attribute.
+
+Inputs: 
+	Option id     - CFG_ID value defined by nvm_cfg.h e.g., NVM_CFG_ID_MAC_ADDRESS
+	Entity id     - PF number. Valid only when entity-select config flag is set i.e.,
+			QED_NVM_CFG_OPTION_ENTITY_SEL.
+	config flags  - One or more config flags i.e., QED_NVM_CFG_OPTION_*.
+	Config value  - NVM config attriubte value to be written at the given offset.
+	offset        - Offset into the nvm-config attribute buffer.
+
+Outputs:
+	command status - 0 for success
+	
+Some of the attributes are more than 4 bytes (e.g., MAC) for which multiple
+reads/writes are required e.g., for mac -read , read 4 bytes from offset 0
+followed by 4 bytes from offset 4.
+
+Examples:
+1. Read mf mode (NVM_CFG_ID_MF_MODE).
+	# echo nvm_get_cfg 9 0 10  0 > /sys/kernel/debug/qed/04\:00.0/tests
+	# cat /sys/kernel/debug/qed/04\:00.0/tests
+	1
+	#
+
+2. Read MAC address (NVM_CFG_ID_MAC_ADDRESS) of PF0.
+	# echo nvm_get_cfg 1 0 10  0 > /sys/kernel/debug/qed/04\:00.0/tests
+	# cat /sys/kernel/debug/qed/04\:00.0/tests
+	14
+	# echo nvm_get_cfg 1 0 10  4 > /sys/kernel/debug/qed/04\:00.0/tests
+	# cat /sys/kernel/debug/qed/04\:00.0/tests
+	516322176
+	#
+
+3. Read MAC address (NVM_CFG_ID_MAC_ADDRESS) of PF1.
+	# echo nvm_get_cfg 1 0 10  0 > /sys/kernel/debug/qed/04\:00.1/tests
+	# cat /sys/kernel/debug/qed/04\:00.1/tests
+	14
+	# echo nvm_get_cfg 1 0 10  4 > /sys/kernel/debug/qed/04\:00.1/tests
+	# cat /sys/kernel/debug/qed/04\:00.1/tests
+	516322177
+	#
+
+4. Read MAC address (NVM_CFG_ID_MAC_ADDRESS) of PF1 from base pf (PF0) using SELECT-PF option.
+	# echo nvm_get_cfg 1 1 26  0 > /sys/kernel/debug/qed/04\:00.0/tests
+	# cat /sys/kernel/debug/qed/04\:00.0/tests
+	14
+	# echo nvm_get_cfg 1 1 26  4 > /sys/kernel/debug/qed/04\:00.0/tests
+	# cat /sys/kernel/debug/qed/04\:00.0/tests
+	516322177
+	#
+
+5. Update MAC address (NVM_CFG_ID_MAC_ADDRESS) of PF0.
+	# echo nvm_get_cfg 1 0 10  0 > /sys/kernel/debug/qed/04\:00.0/tests
+	# cat /sys/kernel/debug/qed/04\:00.0/tests
+	14
+	# echo nvm_get_cfg 1 0 10  4 > /sys/kernel/debug/qed/04\:00.0/tests
+	# cat /sys/kernel/debug/qed/04\:00.0/tests
+	516322176
+	#
+	# echo nvm_set_cfg 1 0 14  516322186 4 > /sys/kernel/debug/qed/04\:00.0/tests
+	# cat /sys/kernel/debug/qed/04\:00.0/tests
+	0
+	# echo nvm_get_cfg 1 0 10  4 > /sys/kernel/debug/qed/04\:00.0/tests
+	# cat /sys/kernel/debug/qed/04\:00.0/tests
+	516322186
+	#
+
+6. Read length of mf mode attribute (NVM_CFG_ID_MF_MODE).
+	# echo nvm_get_cfg_len 9  > /sys/kernel/debug/qed/04\:00.0/tests
+	# cat /sys/kernel/debug/qed/04\:00.0/tests
+	1
+	#
+
+7. Read length of MAC address attribute (NVM_CFG_ID_MAC_ADDRESS).
+	# echo nvm_get_cfg_len 1  > /sys/kernel/debug/qed/04\:00.0/tests
+	# cat /sys/kernel/debug/qed/04\:00.0/tests
+	8
+	#
+
+set_vf_stats_bin_id
+-------------------
+The command is used to set the VF stats bin number in cdev structure.
+When this value is set, qed_get_vport_stats() implementation reads/returns
+the statistics at this bin number and then clears the cached value. Successive
+call to qed_get_vport_stats() returns the actual PF stats.
+
+Example: Read VF 0 stats of PF
+1. Set bin id for VF 0
+	#echo set_vf_stats_bin_id 0 > /sys/kernel/debug/qed/04\:00.0/tests
+2. Invoke qed_get_vport_stats() which would return VF 0 stats.
+
+Note: qed_get_vport_stats() is invoked periodically from the network stack.
+      There could be race between stack PF stats request and the VF stats query. 

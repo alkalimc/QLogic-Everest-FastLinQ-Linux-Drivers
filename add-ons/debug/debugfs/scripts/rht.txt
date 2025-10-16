@@ -1,0 +1,4 @@
+reset 0 0 0 0
+set_pci_output 4096
+enable_storm t rh
+start

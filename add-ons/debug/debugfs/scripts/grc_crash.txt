@@ -1,0 +1,3 @@
+config ior 1
+config unstall 1
+dump

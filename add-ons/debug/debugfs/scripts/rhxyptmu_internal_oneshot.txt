@@ -1,0 +1,8 @@
+reset 1 0 0 0
+enable_storm x rh
+enable_storm y rh
+enable_storm p rh
+enable_storm t rh
+enable_storm m rh
+enable_storm u rh
+start

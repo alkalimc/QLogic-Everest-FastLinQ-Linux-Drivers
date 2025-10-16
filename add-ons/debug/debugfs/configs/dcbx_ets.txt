@@ -1,0 +1,7 @@
+transmit send algorithm
+-----------------------
+tc  0  tsa  ets(2)     (10%)
+tc  1  tsa  ets(2)     (20%)
+tc  2  tsa  ets(2)     (30%)
+tc  3  tsa  ets(2)     (40%)
+

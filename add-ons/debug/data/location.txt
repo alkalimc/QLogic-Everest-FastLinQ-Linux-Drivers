@@ -1,0 +1,1 @@
+grc_parser:	/usr/qlc/proj/bcm5710sw_rel/fw_versions/Scripts/parse_dump_auto.sh

@@ -1,0 +1,4 @@
+dscp pfc
+--------
+dscp_pfc disabled(0)
+

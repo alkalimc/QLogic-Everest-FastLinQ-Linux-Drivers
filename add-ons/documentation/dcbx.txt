@@ -1,0 +1,277 @@
+Configuring DCBX
+----------------
+----------------
+
+debugfs_conf.sh and debugfs_dump.sh
+-----------------------------------
+the rest of this document details the various debugfs nodes allowing
+configuration of dcbx related values via debugfs. Please note that the
+debugfs_dump.sh and debugfs_conf.sh scripts serve as wrappers for all
+the below commands, creating a simpler and more user friendly way to
+configure tunables.
+
+dscp_pfc_enable
+---------------
+Enable/disable dscp on the pf
+When dscp_pfc is enabled, RoCE QP's VLAN priority will be overriden by the
+priority mapped from its DSCP value (see qed_roce_get_qp_tc()).
+
+Inputs: 
+	enable - 0 for disable, 1 for enable 
+Outputs:
+	command status - 0 for success
+	
+Example:
+	# echo dscp_pfc_enable 0  >   /sys/kernel/debug/qed/04\:00.0/tests
+	# cat  /sys/kernel/debug/qed/04\:00.0/tests
+	0
+	# echo dscp_pfc_enable 1  >   /sys/kernel/debug/qed/04\:00.0/tests
+	# cat  /sys/kernel/debug/qed/04\:00.0/tests
+	0
+	#
+
+
+dscp_pfc_get
+------------
+Returns priority value for a given dscp entry
+
+Inputs: 
+	Dscp Index
+
+Outputs:
+	Priority value
+
+dscp_pfc_set
+------------
+Configure priority value for a given dscp entry
+
+Inputs: 
+	dscp index
+	priority value
+
+Outputs:
+	command status - 0 for success
+
+Example:
+	# echo dscp_pfc_get 0 >   /sys/kernel/debug/qed/04\:00.0/tests
+	# cat  /sys/kernel/debug/qed/04\:00.0/tests
+	0
+	# echo dscp_pfc_set 0 2 >   /sys/kernel/debug/qed/04\:00.0/tests
+	# echo dscp_pfc_get 0 >   /sys/kernel/debug/qed/04\:00.0/tests
+	# cat  /sys/kernel/debug/qed/04\:00.0/tests
+	2
+	#
+
+
+dcbx_set_mode
+-------------
+Configure dcbx mode for the PF
+
+Inputs: 
+	mode – 0x00 disable
+		0x04 cee
+		0x08 ieee
+		0x10 static
+ 	
+Outputs:
+	command status - 0 for success
+
+dcbx_get_mode
+-------------
+Get operational dcbx mode of the PF
+
+Inputs: 
+	None 
+
+Outputs:
+	Mode value.
+
+Example:
+	# echo dcbx_set_mode 4 >   /sys/kernel/debug/qed/04\:00.0/tests
+	# echo dcbx_get_mode  >   /sys/kernel/debug/qed/04\:00.0/tests
+	# cat  /sys/kernel/debug/qed/04\:00.0/tests
+	4
+	# echo dcbx_set_mode 0x10 >   /sys/kernel/debug/qed/04\:00.0/tests
+	# echo dcbx_get_mode  >   /sys/kernel/debug/qed/04\:00.0/tests
+	# cat  /sys/kernel/debug/qed/04\:00.0/tests
+	16
+	#
+
+
+dcbx_get_pfc
+-------------
+Returns pfc enable value for a given priority
+
+Inputs: 
+	 Priority value
+
+Outputs:
+	Pfc enable - 0 for disable, 1 for enable
+
+dcbx_set_pfc
+------------
+Set pfc enable value for a given priority
+
+Inputs: 
+	Priority value
+	Pfc enable flag for the priority - 0 for disable, 1 for enable
+ 
+Outputs:
+	command status - 0 for success
+
+Example:
+	# echo dcbx_get_pfc 1 >   /sys/kernel/debug/qed/04\:00.0/tests
+	# cat  /sys/kernel/debug/qed/04\:00.0/tests | grep pfc
+	# echo dcbx_get_pfc 1 >   /sys/kernel/debug/qed/04\:00.0/tests
+	# cat  /sys/kernel/debug/qed/04\:00.0/tests
+	0
+	# echo dcbx_set_pfc 1 1 >   /sys/kernel/debug/qed/04\:00.0/tests
+	# cat  /sys/kernel/debug/qed/04\:00.0/tests
+	0
+	# echo dcbx_get_pfc 1 >   /sys/kernel/debug/qed/04\:00.0/tests
+	# cat  /sys/kernel/debug/qed/04\:00.0/tests
+	1
+	#
+
+
+dcbx_get_pri_to_tc
+------------------
+Returns TC value for a given priority
+
+Inputs: 
+	Priority value
+
+Outputs:
+	TC value associated with the priority.
+
+dcbx_set_pri_to_tc
+------------------
+Set TC value for a given priority
+
+Inputs: 
+	Priority value
+	TC value for the given priority.
+
+Outputs:
+	command status - 0 for success
+
+	Example:
+	# echo dcbx_get_pri_to_tc 2 >   /sys/kernel/debug/qed/04\:00.0/tests
+	# cat  /sys/kernel/debug/qed/04\:00.0/tests
+	0
+	# echo dcbx_set_pri_to_tc 2 2 >   /sys/kernel/debug/qed/04\:00.0/tests
+	# cat  /sys/kernel/debug/qed/04\:00.0/tests
+	0
+	# echo dcbx_get_pri_to_tc 2 >   /sys/kernel/debug/qed/04\:00.0/tests
+	# cat  /sys/kernel/debug/qed/04\:00.0/tests
+	2
+	#
+
+
+dcbx_get_tc_bw
+--------------
+Returns bandwidth percentage for a given TC
+
+Inputs: 
+	TC value 
+
+Outputs:
+	Bandwidth value associated with the TC.
+
+dcbx_get_tc_tsa
+---------------
+Returns TSA value for a given TC
+
+Inputs: 
+	TC value 
+
+Outputs:
+	TSA value associated with the TC.
+
+dcbx_set_tc_bw_tsa
+------------------
+Set bandwidth percentage and TSA for a given TC
+
+Inputs: 
+	TC value 
+	Bandwidth percent for the TC.
+	TSA value for the TC.
+
+Outputs:
+	command status - 0 for success
+
+Example:
+	# echo dcbx_get_tc_bw 1 >   /sys/kernel/debug/qed/04\:00.0/tests
+	# cat  /sys/kernel/debug/qed/04\:00.0/tests
+	0
+	# echo dcbx_get_tc_tsa 1 >   /sys/kernel/debug/qed/04\:00.0/tests
+	# cat  /sys/kernel/debug/qed/04\:00.0/tests
+	0
+	# echo dcbx_set_tc_bw_tsa 1 50 2 >   /sys/kernel/debug/qed/04\:00.0/tests
+	# cat  /sys/kernel/debug/qed/04\:00.0/tests
+	0
+	# echo dcbx_get_tc_bw 1 >   /sys/kernel/debug/qed/04\:00.0/tests
+	# cat  /sys/kernel/debug/qed/04\:00.0/tests
+	50
+	# echo dcbx_get_tc_tsa 1 >   /sys/kernel/debug/qed/04\:00.0/tests
+	# cat  /sys/kernel/debug/qed/04\:00.0/tests
+	2
+	#
+
+
+dcbx_get_app
+------------
+Get priority value for a given protocol type.
+
+Inputs: 
+	idtype - protocol identifier type
+		value in cee mode:
+			0x0 (DCB_APP_IDTYPE_ETHTYPE)
+			0x1 (DCB_APP_IDTYPE_PORTNUM)
+		value in ieee mode:
+			As defined by the 'enum qed_dcbx_sf_ieee_type'.
+ 	idval - protocol value
+
+Outputs:
+	Priority value
+
+dcbx_set_app
+------------
+Set priority value for a given protocol type.
+
+Inputs: 
+	idtype - protocol identifier type
+		value in cee mode:
+			0x0 (DCB_APP_IDTYPE_ETHTYPE)
+			0x1 (DCB_APP_IDTYPE_PORTNUM)
+		value in ieee mode:
+			As defined by the 'enum qed_dcbx_sf_ieee_type'.
+	idval - protocol value
+	pri   - priority value
+
+Outputs:
+	command status - 0 for success
+
+Examples:
+1. Cee mode
+	#echo dcbx_set_app 0 0x8915 2  >   /sys/kernel/debug/qed/04\:00.0/tests
+	#echo dcbx_set_app 1 0x12B7 3  >   /sys/kernel/debug/qed/04\:00.0/tests
+
+	#echo dcbx_get_app 0 0x8915  >   /sys/kernel/debug/qed/04\:00.0/tests
+	#cat /sys/kernel/debug/qed/04\:00.0/tests
+	2
+	#echo dcbx_get_app 1 0x12B7  >   /sys/kernel/debug/qed/04\:00.0/tests
+	#cat /sys/kernel/debug/qed/04\:00.0/tests
+	3
+	#	
+2. Ieee mode
+	#echo dcbx_set_app 2 0x12B7 7  >   /sys/kernel/debug/qed/04\:00.0/tests
+	#echo dcbx_set_app 3 0xCBC 5  >   /sys/kernel/debug/qed/04\:00.0/tests
+
+	#echo dcbx_get_app 2 0x12B7  >   /sys/kernel/debug/qed/04\:00.0/tests
+	#cat /sys/kernel/debug/qed/04\:00.0/tests
+	7
+	#echo dcbx_get_app 3 0xCBC >   /sys/kernel/debug/qed/04\:00.0/tests
+	#cat /sys/kernel/debug/qed/04\:00.0/tests
+	5
+	#	

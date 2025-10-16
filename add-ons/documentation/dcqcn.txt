@@ -1,0 +1,205 @@
+Configuring DCQCN
+-----------------
+-----------------
+
+A note on configuration
+-----------------------
+The rest of this document contains examples on how to configure values through
+debugfs via our debugfs.sh script. Please note that debugfs_dump.sh and
+debugfs_conf.sh scripts serve as wrappers to that script, and may offer a more
+user friendly method of setting and saving conigurations.
+
+Background and Definitions
+--------------------------
+TOS (type of service) is a single byte in IPv4 header field. It is comprised of
+2 lsb ECN bits and 6 msb DSCP bits. Traffic Class is the IPv6 equivalent for
+IPv4's TOS.
+
+ECN (explicit congestion notification) is a mechanism where a switch adds to
+outgoing traffic an indication that congestion is imminent.
+
+DCQCN is a feature determining in what way would a RoCE receiver notify a
+transmitter that a switch between them has provided an explicit congestion
+notification (notification point) and in what way a transmitter would react to
+such notification (reaction point). More info in next section.
+
+CNP (congestion notification packet) is a packet used by the notification
+point to indicate ECN arrived from switch back to the reaction point. CNP is
+defined in the RoCEv2 Annex IB spec.
+
+Vlan Priority is a field in the L2 vlan header. It is the 3 msb bits in the vlan
+tag.
+
+PFC is a flow control mechanism which applies to traffic carrying specific vlan
+priority.
+
+DSCP-PFC is a feature where a receiver interprets the priority of an incoming
+packet for PFC purposes not according to the vlan priority but according to the
+dscp field in it's IPv4 header. Possibly an indirection table can be used by
+which a given DSCP value is mapped to a vlan priority value. DSCP-PFC has the
+ability to work across L2 networks, as it is an L3 (IPv4) feature.
+
+Traffic classes, also known as priority groupsm are groups of vlan priorities
+(or DSCP values if DSCP-PFC is used) which can have properties such being lossy
+or lossless.
+
+ETS is an allocation of max bandwidth per traffic class.
+
+
+DCQCN in a (tiny) nutshell
+--------------------------
+Some networking protocols require droplessness (e.g. RoCE). PFC is a mechanism
+for achieving droplessness in an L2 network, and DSCP-PFC is a mechanism for
+achieving it across distinct L2 networks. However, PFC is crude in 3 senses:
+
+1. When activated, it completely halts the traffic of the given priority on the
+   port, as opposed to reducing transmission rate.
+
+2. All traffic of the specified priority is affected, even if there is a subset
+   of specific connections which are causing the congestion.
+
+3. It is a single-hop mechanism, i.e. if a receiver experiences congestion and
+   indicates this through a PFC packet, only the nearest neighbor will react.
+   When the neighbor will also experience congestion (likely since it can no
+   longer transmit) it too will generate its own PFC, and so on. This is known
+   as pause propogation. This may lead to poor route utilization, since all
+   buffers need to congest before the transmitter is made aware of the problem.
+
+DCQCN addresses all of these disadvantages. Congestion indication is delivered
+via ECN to the reaction point. The reaction point would send a CNP packet to
+the transmitter, which would react by reducing it's transmission rate and
+avoiding the congestion. DCQCN also specifies in what way the transmitter would
+attempt to increase it's transmission rate once no more congestion occurs, to
+utilize the bandwidth effectively. DCQCN is described in the 2015 sigcomm paper
+http://conferences.sigcomm.org/sigcomm/2015/pdf/papers/p523.pdf.
+
+
+DCB related parameters
+----------------------
+DCB can configure the mapping of priorities to traffic classes (aka priority
+groups). DCB also controls which priority groups will be subject to PFC
+(lossless traffic), and the related bandwidth allocation (ETS).
+
+
+Global setting of Vlan Priority on RDMA traffic
+-----------------------------------------------
+The vlan priority used by a given QP can be set by an application when creating
+a QP. For example, the ib_write_bw benchmark controls this via the -sl
+parameter. Note that in the presence of RDMA CM, this is not always possible.
+
+Another method to control the vlan priority is via the rdma_glob_vlan_pri
+knob. This affects QPs created after setting the value. For example, setting
+the vlan priority to 3 for subsequently created QPs can be done with:
+./debugfs.sh -n eth0 -t rdma_glob_vlan_pri 3
+
+
+Global setting of ECN on RDMA traffic
+-------------------------------------
+Use the rdma_glob_ecn node to enable ecn for a given roce priority. For
+example, to enable ecn on roce traffic using priority 3 can be done with:
+./debugfs.sh -n eth0 -t rdma_glob_ecn 1
+Note: typically required when DCQCN is enabled.
+
+
+Global setting of DSCP on RDMA traffic
+--------------------------------------
+Use the rdma_glob_dscp node to control DSCP. For example, to set dscp on roce
+traffic using priority 3 can be done with:
+./debugfs.sh -n eth0 -t rdma_glob_dscp 6
+Notes: typically required when dcqcn is enabled.
+       RoCE QPs will override the VLAN priority according to the DSCP value
+       when global VLAN priority is not set.
+
+
+DSCP-PFC configuration
+----------------------
+Configuring dscp->priority association for PFC is done via dscp_pfc nodes.
+The feature has to be enabled, and then entries can be added to the map.
+For example, mapping dscp value 6 to priority 3 can be done by:
+./debugfs.sh -n eth0 -t dscp_pfc_enable 1
+./debugfs.sh -n eth0 -t dscp_pfc_set 6 3
+
+
+Enabling DCQCN
+--------------
+Probing the qed driver with the dcqcn_enable module parameter would enable
+dcqcn for roce traffic. DCQCN requires enabling ECN indications (see Global
+setting of ECN on RDMA traffic).
+
+
+CNP configuration
+-----------------
+Congestion notification packets can have a separate configuration of vlan
+priority and dscp. These are controlled via dcqcn_cnp_dscp and
+dcqcn_cnp_vlan_priority module parameters, e.g.
+modprobe qed dcqcn_cnp_dscp=10 dcqcn_cnp_vlan_priority=6
+
+
+DCQCN algorithm parameters
+--------------------------
+dcqcn_cnp_send_timeout:Minimal difference of send time between CNP packets. Units are in microseconds. Values between 50..500000
+dcqcn_cnp_dscp:DSCP value to be used on CNP packets. Values between 0..63
+dcqcn_cnp_vlan_priority:vlan priority to be used on CNP packets. Values between 0..7
+dcqcn_notification_point:0 - Disable dcqcn notification point. 1 - Enable dcqcn notification point
+dcqcn_reaction_point:0 - Disable dcqcn reaction point. 1 - Enable dcqcn reaction point
+dcqcn_rl_bc_rate:Byte counter limit
+dcqcn_rl_max_rate:Maximum rate in Mbps
+dcqcn_rl_r_ai:Active increase rate in Mbps
+dcqcn_rl_r_hai:Hyper active increase rate in Mbps
+dcqcn_gd:Alpha update gain denominator. Set to 32 for 1/32, etc.
+dcqcn_k_us:Alpha update interval
+dcqcn_timeout_us:Dcqcn timeout
+
+
+Mac Statistics
+--------------
+To view Mac statistics including per priority PFC stats, use the phy_mac_stats
+command. For example, to view stats on port 1 use
+./debugfs.sh -n eth0 -d phy_mac_stat -P 1
+
+
+Example (can be used as a script)
+---------------------------------
+# probe the driver with both reaction point and notification point enabled
+# with cnp dscp set to 10 and cnp vlan priority set to 6
+modprobe qed dcqcn_enable=1 dcqcn_notification_point=1 dcqcn_reaction_point=1
+dcqcn_cnp_dscp=10 dcqcn_cnp_vlan_priority=6
+modprobe qede
+
+# dscp-pfc configuration (associating dscp values to priorities)
+debugfs.sh -n ens6f0 -t dscp_pfc_enable 1
+debugfs.sh -n ens6f0 -t dscp_pfc_set 20 3
+debugfs.sh -n ens6f0 -t dscp_pfc_set 22 4
+
+# static DCB configurations. 0x10 is static mode. Mark priorities 3 and 4 as
+# subject to pfc
+debugfs.sh -n ens6f0 -t dcbx_set_mode 0x10
+debugfs.sh -n ens6f0 -t dcbx_set_pfc 3 1
+debugfs.sh -n ens6f0 -t dcbx_set_pfc 4 1
+
+# set roce global overrides for qp params. enable exn and open QPs with dscp 20
+debugfs.sh -n ens6f0 -t rdma_glob_ecn 1
+debugfs.sh -n ens6f0 -t rdma_glob_dscp 20
+
+# open some QPs (DSCP 20)
+ib_write_bw -d qedr0 -q 16 -F -x 1 --run_infinitely
+
+# change global dscp qp params
+debugfs.sh -n ens6f0 -t rdma_glob_dscp 22
+
+# open some more QPs (DSCP 22)
+ib_write_bw -d qedr0 -q 16 -F -x 1 -p 8000 --run_infinitely
+
+# observe PFCs being generated on multiple priorities
+debugfs.sh -n ens6f0 -d phy_mac_stat -P 0 | grep "Class Based Flow Control"
+
+
+Limitations
+-----------
+Currently only up to 64 qps are supported in DCQCN mode.
+
+Cavium device can determine vlan priority for PFC purpose from vlan priority or
+from DSCP bits in the TOS field. Order of precedence:
+1. Global VLAN priority override
+2. DSCP value's mapped priority (only with VLAN tag presence)
+3. Current VLAN priority in VLAN tag

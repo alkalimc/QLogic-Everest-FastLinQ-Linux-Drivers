@@ -1,0 +1,73 @@
+NIC statistics,,,,
+     rcv_pkts, Number of received packets / rcv_pkts += qede_rx_process_cqe()
+     rx_csum_errors, If this is an error packet then drop it: Checksum Validated for / tunnel L4 checksum/ L4 checksum /tunnel-ipv4-version-mismatch /tunnel-ipv4-hdr-len-error /tunnel-ipv4-cksm validation failed
+     rx_alloc_errors, Unable to allocate SKB.
+     rx_ip_frags, packet is IPv4/IPv6 fragment
+     xdp_no_pass, Count number of XDP packets not to be passed to stack
+     pool_full, Unable to add page to pool/ Pool full.
+     pool_unready, Unable to get page from pool/ Pool unready. 
+     xmit_pkts, Number of transmit packets.
+     stopped_cnt, TX queue stopped.
+     rx_ucast_bytes, Received unicast bytes per ustorm.
+     rx_mcast_bytes, Received multicast bytes per ustorm.
+     rx_bcast_bytes, Received broadcast bytes per ustrom.
+     rx_ucast_pkts, Received unicast packets per ustorm.
+     rx_mcast_pkts, Received multicast packets per ustorm. 
+     rx_bcast_pkts, Received Multicast packets per ustorm.
+     tx_ucast_bytes, number of total unicast bytes sent without errors.
+     tx_mcast_bytes, number of total multicast bytes sent without errors.
+     tx_bcast_bytes, number of total broadcast bytes sent without errors.
+     tx_ucast_pkts, number of total unicast packets sent without errors.
+     tx_mcast_pkts, number of total multicast packets sent without errors.
+     tx_bcast_pkts, number of total broadcast packets sent without errors.
+     rx_64_byte_packets, RX 64-byte frame counter.
+     rx_65_to_127_byte_packets, RX 65 to 127 byte frame counter.
+     rx_128_to_255_byte_packets, RX 128 to 255 byte frame counter.
+     rx_256_to_511_byte_packets, RX 256 to 511 byte frame counter.
+     rx_512_to_1023_byte_packets, RX 512 to 1023 byte frame counter.
+     rx_1024_to_1518_byte_packets, RX 1024 to 1518 byte frame counter.
+     rx_1519_to_1522_byte_packets, RX 1519 to 1522 byte VLAN-tagged frame counter.
+     rx_1519_to_2047_byte_packets, RX 1519 to 2047 byte frame counter.
+     rx_2048_to_4095_byte_packets, RX 2048 to 4095 byte frame counter.
+     rx_4096_to_9216_byte_packets, RX 4096 to 9216 byte frame counter.
+     rx_9217_to_16383_byte_packets, RX 9217 to 16383 byte frame counter
+     tx_64_byte_packets, TX 64-byte frame counter.
+     tx_65_to_127_byte_packets, TX 65 to 127 byte frame counter.
+     tx_128_to_255_byte_packets, TX 128 to 255 byte frame counter.
+     tx_256_to_511_byte_packets, TX 256 to 511 byte frame counter.
+     tx_512_to_1023_byte_packets, TX 512 to 1023 byte frame counter.
+     tx_1024_to_1518_byte_packets, TX 1024 to 1518 byte frame counter.
+     tx_1519_to_2047_byte_packets, TX 1519 to 2047 byte frame counter.
+     tx_2048_to_4095_byte_packets, TX 2048 to 4095 byte frame counter.
+     tx_4096_to_9216_byte_packets, TX 4096 to 9216 byte frame counter.
+     tx_9217_to_16383_byte_packets, TX 9217 to 16383 byte frame counter.
+     rx_mac_crtl_frames, RX control frame counter.
+     tx_mac_ctrl_frames, TX control frame counter.
+     rx_pause_frames, RX pause frame counter.
+     tx_pause_frames, TX pause frame counter.
+     rx_pfc_frames, RX PFC frame counter.
+     tx_pfc_frames, TX PFC frame counter.
+     rx_crc_errors, RX FCS error frame counter.
+     rx_align_errors, RX alignment error counter.
+     rx_carrier_errors, RX false carrier counter.
+     rx_oversize_packets, RX oversized frame counter.
+     rx_jabbers, RX jabber frame counter.
+     rx_undersize_packets, RX undersized frame counter.
+     rx_fragments, RX fragment counter.
+     tx_lpi_entry_count, Transmit Logical Type LLFC message counter.
+     tx_total_collisions, Transmit Total Collision Counter.
+     brb_truncates, Packets truncated due to rx buffer full in device
+     brb_discards, Packets discarded due to rx buffer full in device
+     no_buff_discards, Number of packets discarded due to lack of host buffers.
+     mftag_filter_discards, packet is dropped because classification was unsuccessful.
+     mac_filter_discards, packet was passed to Ethernet and dropped because of no mac filter match.
+     gft_filter_drop, GFT dropped packets.
+     tx_err_drop_pkts, number of total packets dropped due to errors.
+     ttl0_discard, Number of packets discarded because TTL=0 (in IPv4) or hopLimit=0 (in IPv6)
+     packet_too_big_discard, Number of packets discarded because they are bigger than MTU.
+     coalesced_pkts, number of coalesced packets in all TPA aggregations.
+     coalesced_events, total number of TPA aggregations.
+     coalesced_aborts_num, number of aggregations which abnormally ended.
+     non_coalesced_pkts, Packets which were recevied in normal path, no aggregration.
+     coalesced_bytes, total TCP payload length in all TPA aggregations.
+     link_change_count, Amount of times link changed

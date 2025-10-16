@@ -1,0 +1,13 @@
+MAC stats
+ETHERSTATSOCTETS,total/good and bad,
+OCTETSOK,total/good,
+FRAMESOK,Good frames received,
+IFINMCASTPKTS,,Good Multicast received,
+ETHERSTATSPKTS,Frames received / good and bad,
+ETHERSTATSPKTS65TO127,Frames of 65 to 127 octets received,
+TXETHERSTATSOCTETS,total/ good and bad,
+TXOCTETSOK,total/ good,
+TXFRAMESOK,Good frames transmitted,
+IFOUTMCASTPKTS,Good Multicast transmitted,
+TXETHERSTATSPKTS,Frames transmitted, good and bad,
+TXETHERSTATSPKTS65TO127,Frames of 65 to 127 octets transmitted,

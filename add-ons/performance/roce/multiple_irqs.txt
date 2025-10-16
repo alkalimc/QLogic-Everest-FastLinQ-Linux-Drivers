@@ -1,0 +1,66 @@
+
+    QEDR Guidelines  - Working with Multiple CPUs
+    ============================================
+
+Overview
+========
+RoCE supports both polling and interrupt-enabled modes. When using interrupt-
+enabled mode in a multi-CPU chip it is usually desirable to configure the
+interrupts to run on different CPUs to increase the throughput. While the
+versatility  of handling each interrupt line on each CPU may be tempting it is
+actually a sub-optimal configuration in terms of processing speed, affecting
+throughput, due to coherency locks. Thus symmetrical parallel processing is
+preferred. This document will explain how to configure and verify this.
+
+The following has been tested with the perftest application ib_send_bw with
+the '-e' option (the other perftest applications do not support interrupt-
+enabled mode), as well as with an iSER scenario using "pain". The latter
+showed a very high throughput gain.
+
+The maximum number of interrupts that can be used is determined when the driver
+loads and is dependent of the NIC resources, e.g., the number of status blocks,
+and other protocols, as well as OS resources i.e. available MSI-X interrupts.
+
+Configuration
+=============
+In the following example we can see that there are four interrupts associated
+with qedr0 (note that we can also see, from the number of columns, that there
+are 16 CPUs, and that no interrupts occurred):
+
+# cat /proc/interrupts | grep qedr0
+ 266:   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   PCI-MSI-edge      qedr0-0
+ 267:   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   PCI-MSI-edge      qedr0-1
+ 268:   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   PCI-MSI-edge      qedr0-2
+ 269:   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   PCI-MSI-edge      qedr0-3
+
+The smp_affinity attribute indicates they can run on every CPU:
+
+# cat /proc/irq/26[6-9]/smp_affinity
+ 00ffff
+ 00ffff
+ 00ffff
+ 00ffff
+
+We will now associate each IRQ with specific CPUs:
+# echo 00000f > /proc/irq/266/smp_affinity
+# echo 0000f0 > /proc/irq/267/smp_affinity
+# echo 000f00 > /proc/irq/268/smp_affinity
+# echo 00f000 > /proc/irq/269/smp_affinity
+
+After running a scenario that exercises interrupts the expected output will
+similar to the following:
+# cat /proc/interrupts | grep qedr0
+ 266:   X   X   X   X   0   0   0   0   0   0   0   0   0   0   0   0   PCI-MSI-edge      qedr0-0
+ 267:   0   0   0   0   X   X   X   X   0   0   0   0   0   0   0   0   PCI-MSI-edge      qedr0-1
+ 268:   0   0   0   0   0   0   0   0   X   X   X   X   0   0   0   0   PCI-MSI-edge      qedr0-2
+ 269:   0   0   0   0   0   0   0   0   0   0   0   0   X   X   X   X   PCI-MSI-edge      qedr0-3
+
+Where X is a non-zero value.
+
+
+
+Notes
+=====
+* Only MSI-X interrupts are supported.
+* A ready-made script to configure the IRQs for parallel processing is located
+  in the folder <release folder>/add-ons/performance/roce 

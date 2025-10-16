@@ -1,0 +1,51 @@
+Debug verbose in netdev
+=======================
+
+	NETIF_MSG_DRV		= 0x0001,    - Information regarding network debug feature infrastructure in kernel.
+	NETIF_MSG_PROBE		= 0x0002,    - Information regarding probe of driver module.
+	NETIF_MSG_LINK		= 0x0004,    - Information regarding network interface link.
+	NETIF_MSG_TIMER		= 0x0008,    - Information regarding timer infrastructure.
+	NETIF_MSG_IFDOWN	= 0x0010,    - Information regarding link down flow.
+	NETIF_MSG_IFUP		= 0x0020,    - Information regarding link up flow.
+	NETIF_MSG_RX_ERR	= 0x0040,    - Information regarding receive error.
+	NETIF_MSG_TX_ERR	= 0x0080,    - Information regarding transmit error.
+	NETIF_MSG_TX_QUEUED	= 0x0100,    - Information regarding transmission queues in fastpath.
+	NETIF_MSG_INTR		= 0x0200,    - Information regarding assertion, attentions and interrupt handling.
+	NETIF_MSG_TX_DONE	= 0x0400,    - Information regarding transmission completion.
+	NETIF_MSG_RX_STATUS	= 0x0800,    - Information regarding receive queues in fastpath.
+	NETIF_MSG_PKTDATA	= 0x1000,    - Information regarding packet / buffer data. 
+	NETIF_MSG_HW		= 0x2000,    - Information regarding hardware data [e.g. register access ].
+	NETIF_MSG_WOL		= 0x4000,    - Information regarding wake on LAN.
+
+Debug verbose in qed/qede
+==========================
+
+        QED_MSG_SPQ             = 0x10000,   - Information regarding slowpath queues setting.
+        QED_MSG_STATS           = 0x20000,   - Information regarding driver stats.
+        QED_MSG_DCB             = 0x40000,   - Information regarding DCBx configuration and settings. 
+        QED_MSG_IOV             = 0x80000,   - Information regarding SRIOV. If VMs are being used, best practice to set this on VMs and Hypervisor both.
+        QED_MSG_SP              = 0x100000,  - Information regarding slowpath (All Ramrods and Mailboxes).
+        QED_MSG_STORAGE         = 0x200000,  - Information regarding storage.
+        QED_MSG_OOO             = 0x200000,  - Information regarding out of order packets/buffers.
+        QED_MSG_CXT             = 0x800000,  - Information regarding context manager [e.g. - CIDs.]
+        QED_MSG_LL2             = 0x1000000, - Information regarding light L2.
+        QED_MSG_ILT             = 0x2000000, - Information regarding ILT.
+        QED_MSG_RDMA            = 0x4000000, - Information regarding RDMA, (RoCE and iWARP).
+        QED_MSG_DEBUG           = 0x8000000, - Information regarding debug feature infrastructure.
+
+Debug verbose in qedr
+======================
+
+        QEDR_MSG_INIT           = 0x10000,   - Information regarding initialization.
+        QEDR_MSG_FAIL           = 0x10000,   - Information regarding failure.
+        QEDR_MSG_CQ             = 0x20000,   - Information regarding completion queue.
+        QEDR_MSG_RQ             = 0x40000,   - Information regarding receive queue.
+        QEDR_MSG_SQ             = 0x80000,   - Information regarding send queue.
+        QEDR_MSG_QP             = 0xC0000,   - Information regarding queue pairs.
+        QEDR_MSG_MR             = 0x100000,  - Information regarding memory region.
+        QEDR_MSG_GSI            = 0x200000,  - Information regarding general service interface.
+        QEDR_MSG_MISC           = 0x400000,  - Information regarding miscellaneous topics.
+        QEDR_MSG_SRQ            = 0x800000,  - Information regarding shared receive queue.
+        QEDR_MSG_IWARP          = 0x1000000, - Information regarding iWARP.
+
+
