@@ -3238,8 +3238,15 @@ static void qede_napi_add_enable(struct qede_dev *edev)
 
 	/* Add NAPI objects */
 	for_each_queue(i) {
+		//netif_napi_add(edev->ndev, &edev->fp_array[i].napi,
+		//	       qede_poll, NAPI_POLL_WEIGHT);
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 1))
+		netif_napi_add_weight(edev->ndev, &edev->fp_array[i].napi,
+			       qede_poll, NAPI_POLL_WEIGHT);
+#else
 		netif_napi_add(edev->ndev, &edev->fp_array[i].napi,
 			       qede_poll, NAPI_POLL_WEIGHT);
+#endif
 		napi_enable(&edev->fp_array[i].napi);
 	}
 }
