@@ -94,11 +94,24 @@ qed_fw_fatal_reporter_dump(struct devlink_health_reporter *reporter,
 		return -ENODATA;
 	}
 
+	//err = devlink_fmsg_binary_pair_put(fmsg, "dump_data",
+	//				   cdev->p_dbg_data_buf,
+	//				   cdev->dbg_data_buf_size);
+	
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 7, 1))
+	devlink_fmsg_binary_pair_put(fmsg, "dump_data",
+					   cdev->p_dbg_data_buf,
+					   cdev->dbg_data_buf_size);
+	err = 0;
+
+	return err;
+#else
 	err = devlink_fmsg_binary_pair_put(fmsg, "dump_data",
 					   cdev->p_dbg_data_buf,
 					   cdev->dbg_data_buf_size);
 
 	return err;
+#endif
 }
 #endif
 
