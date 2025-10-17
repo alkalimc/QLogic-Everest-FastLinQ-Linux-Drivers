@@ -2170,8 +2170,16 @@ static int qed_slowpath_start(struct qed_dev *cdev,
 				      (params->drv_minor << 16) |
 				      (params->drv_rev << 8) |
 				      (params->drv_eng);
+		//strlcpy(drv_version.name, params->name,
+		//	MCP_DRV_VER_STR_SIZE - 4);
+		
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 1))
+		strscpy(drv_version.name, params->name,
+			MCP_DRV_VER_STR_SIZE - 4);
+#else
 		strlcpy(drv_version.name, params->name,
 			MCP_DRV_VER_STR_SIZE - 4);
+#endif
 		rc = qed_mcp_send_drv_version(hwfn, hwfn->p_main_ptt,
 					      &drv_version);
 		if (rc) {
