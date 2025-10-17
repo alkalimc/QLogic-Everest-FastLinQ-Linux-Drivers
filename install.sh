@@ -40,8 +40,9 @@ fi
 
 unset KERNEL_VER
 
-sudo make FASTLINQ_DIR=$FASTLINQ_DIR
-sudo make clean -C $FASTLINQ_DIR -j$N_PROC
+cd $FASTLINQ_DIR
+make clean -C $FASTLINQ_DIR -j$N_PROC
+make -C $FASTLINQ_DIR -j$N_PROC
 sudo make install -C $FASTLINQ_DIR -j$N_PROC
 
 unset FASTLINQ_DIR
