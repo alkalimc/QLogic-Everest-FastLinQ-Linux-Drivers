@@ -36,7 +36,8 @@
 #include <linux/interrupt.h>
 #include <linux/netdevice.h>
 #include <linux/pci.h>
-#include <linux/sched.h>
+//#include <linux/sched.h>
+#include <linux/sched/clock.h>
 #include <linux/skbuff.h>
 #include <linux/types.h>
 #include <net/dcbnl.h>
