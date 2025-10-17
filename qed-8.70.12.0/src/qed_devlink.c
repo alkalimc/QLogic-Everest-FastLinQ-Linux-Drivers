@@ -312,9 +312,19 @@ struct devlink *qed_devlink_register(struct qed_dev *cdev, void *drv_ctx)
 
 			value.vbool = false;
 			cdev->iwarp_cmt = false;
+			//devlink_param_driverinit_value_set(dl,
+			//				   QED_DEVLINK_PARAM_ID_IWARP_CMT,
+			//				   value);
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 3, 1))
+			devl_param_driverinit_value_set(dl,
+							   QED_DEVLINK_PARAM_ID_IWARP_CMT,
+							   value);
+#else
 			devlink_param_driverinit_value_set(dl,
 							   QED_DEVLINK_PARAM_ID_IWARP_CMT,
 							   value);
+#endif
 		}
 
 #ifdef _HAS_DEVLINK_PARAMS_PUBLISH
