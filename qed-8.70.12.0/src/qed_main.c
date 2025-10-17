@@ -705,10 +705,15 @@ static int qed_init_pci(struct qed_dev *cdev,
 	}
 
 	/* AER (Advanced Error reporting) configuration */
+	//rc = pci_enable_pcie_error_reporting(pdev);
+	//if (rc)
+	//	DP_VERBOSE(cdev, NETIF_MSG_DRV, "Failed to configure PCIe AER [%d]\n", rc);
+
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 6, 1))
 	rc = pci_enable_pcie_error_reporting(pdev);
 	if (rc)
 		DP_VERBOSE(cdev, NETIF_MSG_DRV, "Failed to configure PCIe AER [%d]\n", rc);
-
+#endif
 	return 0;
 
 err2:
