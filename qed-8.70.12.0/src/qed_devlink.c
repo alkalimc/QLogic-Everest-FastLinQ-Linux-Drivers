@@ -72,10 +72,20 @@ int qed_report_fatal_error(struct devlink *devlink,
 }
 
 #ifdef _HAS_DEVLINK_DUMP /* QEDE_UPSTREAM */
+//static int
+//qed_fw_fatal_reporter_dump(struct devlink_health_reporter *reporter,
+//			   struct devlink_fmsg *fmsg, void *priv_ctx)
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 10, 1))
 static int
 qed_fw_fatal_reporter_dump(struct devlink_health_reporter *reporter,
 			   struct devlink_fmsg *fmsg, void *priv_ctx,
 			   struct netlink_ext_ack *extack)
+#else
+static int
+qed_fw_fatal_reporter_dump(struct devlink_health_reporter *reporter,
+			   struct devlink_fmsg *fmsg, void *priv_ctx)
+#endif
 {
 	struct qed_devlink *qdl = devlink_health_reporter_priv(reporter);
 	struct qed_fw_fatal_ctx *fw_fatal_ctx = priv_ctx;
@@ -186,7 +196,8 @@ static int qed_dl_param_get_iwarp_cmt(struct devlink *dl, u32 id,
 }
 
 static int qed_dl_param_set_iwarp_cmt(struct devlink *dl, u32 id,
-				      struct devlink_param_gset_ctx *ctx)
+				      struct devlink_param_gset_ctx *ctx,
+			    	  struct netlink_ext_ack *extack)
 {
 	struct qed_devlink *qed_dl = devlink_priv(dl);
 	struct qed_dev *cdev;
