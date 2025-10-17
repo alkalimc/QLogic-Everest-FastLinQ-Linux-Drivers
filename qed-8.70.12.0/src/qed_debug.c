@@ -15948,7 +15948,7 @@ struct qed_func_lookup {
 };
 
 /* lookup tables for finding the correct hsi function from user command */
-const static struct qed_func_lookup qed_bus_hsi_func_lookup[] = {
+static const struct qed_func_lookup qed_bus_hsi_func_lookup[] = {
 	{"reset", qed_str_bus_reset},
 	{"set_pci_output", qed_str_bus_set_pci_output},
 	{"set_nw_output", qed_str_bus_set_nw_output},
@@ -15967,49 +15967,49 @@ const static struct qed_func_lookup qed_bus_hsi_func_lookup[] = {
 	{"dump", qed_str_bus_dump},
 };
 
-const static struct qed_func_lookup qed_grc_hsi_func_lookup[] = {
+static const struct qed_func_lookup qed_grc_hsi_func_lookup[] = {
 	{"config", qed_str_grc_config},
 	{"dump", qed_str_grc_dump},
 };
 
-const static struct qed_func_lookup qed_idle_chk_hsi_func_lookup[] = {
+static const struct qed_func_lookup qed_idle_chk_hsi_func_lookup[] = {
 	{"dump", qed_str_idle_chk_dump},
 };
 
-const static struct qed_func_lookup qed_mcp_trace_hsi_func_lookup[] = {
+static const struct qed_func_lookup qed_mcp_trace_hsi_func_lookup[] = {
 	{"dump", qed_str_mcp_trace_dump},
 };
 
-const static struct qed_func_lookup qed_reg_fifo_hsi_func_lookup[] = {
+static const struct qed_func_lookup qed_reg_fifo_hsi_func_lookup[] = {
 	{"dump", qed_str_reg_fifo_dump},
 };
 
-const static struct qed_func_lookup qed_igu_fifo_hsi_func_lookup[] = {
+static const struct qed_func_lookup qed_igu_fifo_hsi_func_lookup[] = {
 	{"dump", qed_str_igu_fifo_dump},
 };
 
-const static struct qed_func_lookup qed_protection_override_hsi_func_lookup[] = {
+static const struct qed_func_lookup qed_protection_override_hsi_func_lookup[] = {
 	{"dump", qed_str_protection_override_dump},
 };
 
-const static struct qed_func_lookup qed_fw_asserts_hsi_func_lookup[] = {
+static const struct qed_func_lookup qed_fw_asserts_hsi_func_lookup[] = {
 	{"dump", qed_str_fw_asserts_dump},
 };
 
-const static struct qed_func_lookup qed_ilt_hsi_func_lookup[] = {
+static const struct qed_func_lookup qed_ilt_hsi_func_lookup[] = {
 	{"dump", qed_str_ilt_dump},
 };
 
-const static struct qed_func_lookup qed_internal_trace_hsi_func_lookup[] = {
+static const struct qed_func_lookup qed_internal_trace_hsi_func_lookup[] = {
 	{"dump", qed_str_internal_trace_dump},
 };
 
-const static struct qed_func_lookup qed_linkdump_phydump_hsi_func_lookup[] = {
+static const struct qed_func_lookup qed_linkdump_phydump_hsi_func_lookup[] = {
 	{"dump", qed_str_linkdump_phydump_dump},
 };
 
 #ifndef QED_UPSTREAM		/* ! QED_UPSTREAM */
-const static struct qed_func_lookup qed_tests_func_lookup[] = {
+static const struct qed_func_lookup qed_tests_func_lookup[] = {
 	{"qm_reconf", qed_str_qm_reconf_test},
 	{"ets", qed_str_ets_test},
 	{"phony_dcbx", qed_str_phony_dcbx_test},
@@ -16131,7 +16131,7 @@ const static struct qed_func_lookup qed_tests_func_lookup[] = {
 };
 #endif
 
-const static struct qed_func_lookup qed_phy_func_lookup[] = {
+static const struct qed_func_lookup qed_phy_func_lookup[] = {
 	{"core_write", qed_str_phy_core_write},
 	{"core_read", qed_str_phy_core_read},
 	{"raw_write", qed_str_phy_raw_write},
@@ -16376,7 +16376,7 @@ static const char *phy_list =
 
 #define ENGINE_NUM_STR_FUNCS 1
 
-const static struct qed_func_lookup qed_engine_func_lookup[] = {
+static const struct qed_func_lookup qed_engine_func_lookup[] = {
 	{"engine", qed_str_engine},
 };
 
@@ -21311,7 +21311,7 @@ static int qed_str_mdump_clr_retain(struct qed_hwfn *p_hwfn,
 	return rc;
 }
 
-const static struct qed_func_lookup qed_mdump_func_lookup[] = {
+static const struct qed_func_lookup qed_mdump_func_lookup[] = {
 	{"status", qed_str_mdump_status},
 	{"trigger", qed_str_mdump_trigger},
 	{"dump", qed_str_mdump_dump},
@@ -21384,7 +21384,7 @@ static int qed_str_all_data_dump(struct qed_hwfn *p_hwfn, struct qed_ptt *p_ptt,
 	return rc;
 }
 
-const static struct qed_func_lookup qed_all_data_func_lookup[] = {
+static const struct qed_func_lookup qed_all_data_func_lookup[] = {
 	{"dump", qed_str_all_data_dump},
 };
 

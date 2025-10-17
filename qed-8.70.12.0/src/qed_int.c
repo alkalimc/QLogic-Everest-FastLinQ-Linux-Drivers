@@ -1536,8 +1536,16 @@ static int qed_int_deassertion(struct qed_hwfn *p_hwfn, u16 deasserted_bits)
 						scnprintf(bit_name, 30,
 							  p_aeu->bit_name, num);
 					else
+						//strlcpy(bit_name,
+						//	p_aeu->bit_name, 30);
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 1))
+						strscpy(bit_name,
+							p_aeu->bit_name, 30);
+#else
 						strlcpy(bit_name,
 							p_aeu->bit_name, 30);
+#endif
 
 					/* We now need to pass bitmask in its
 					 * correct position.

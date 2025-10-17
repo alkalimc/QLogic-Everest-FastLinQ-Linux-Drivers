@@ -1,3 +1,5 @@
+DISABLE_WERROR = 0
+
 ROCE = 1
 # Makefile for building Linux QLogic 40/50/100-Gigabit Core module.
 AT?=@

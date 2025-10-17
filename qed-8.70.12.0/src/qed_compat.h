@@ -756,7 +756,8 @@ static inline void eth_zero_addr(u8 *addr)
 }
 #endif
 
-#ifndef _HAS_TIME_T
+//#ifndef _HAS_TIME_T
+#ifndef time_t
 #define time_t time64_t
 #endif
 

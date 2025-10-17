@@ -574,7 +574,11 @@ static void qed_free_pci(struct qed_dev *cdev)
 {
 	struct pci_dev *pdev = cdev->pdev;
 
+	//pci_disable_pcie_error_reporting(pdev);
+	
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 6, 1))
 	pci_disable_pcie_error_reporting(pdev);
+#endif
 	if (cdev->doorbells && cdev->db_size)
 		iounmap(cdev->doorbells);
 	if (cdev->regview)
@@ -701,10 +705,15 @@ static int qed_init_pci(struct qed_dev *cdev,
 	}
 
 	/* AER (Advanced Error reporting) configuration */
+	//rc = pci_enable_pcie_error_reporting(pdev);
+	//if (rc)
+	//	DP_VERBOSE(cdev, NETIF_MSG_DRV, "Failed to configure PCIe AER [%d]\n", rc);
+
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 6, 1))
 	rc = pci_enable_pcie_error_reporting(pdev);
 	if (rc)
 		DP_VERBOSE(cdev, NETIF_MSG_DRV, "Failed to configure PCIe AER [%d]\n", rc);
-
+#endif
 	return 0;
 
 err2:
@@ -2161,8 +2170,16 @@ static int qed_slowpath_start(struct qed_dev *cdev,
 				      (params->drv_minor << 16) |
 				      (params->drv_rev << 8) |
 				      (params->drv_eng);
+		//strlcpy(drv_version.name, params->name,
+		//	MCP_DRV_VER_STR_SIZE - 4);
+		
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 1))
+		strscpy(drv_version.name, params->name,
+			MCP_DRV_VER_STR_SIZE - 4);
+#else
 		strlcpy(drv_version.name, params->name,
 			MCP_DRV_VER_STR_SIZE - 4);
+#endif
 		rc = qed_mcp_send_drv_version(hwfn, hwfn->p_main_ptt,
 					      &drv_version);
 		if (rc) {

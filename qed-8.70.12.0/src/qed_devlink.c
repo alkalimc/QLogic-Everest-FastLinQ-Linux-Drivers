@@ -72,10 +72,20 @@ int qed_report_fatal_error(struct devlink *devlink,
 }
 
 #ifdef _HAS_DEVLINK_DUMP /* QEDE_UPSTREAM */
+//static int
+//qed_fw_fatal_reporter_dump(struct devlink_health_reporter *reporter,
+//			   struct devlink_fmsg *fmsg, void *priv_ctx)
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 10, 1))
 static int
 qed_fw_fatal_reporter_dump(struct devlink_health_reporter *reporter,
 			   struct devlink_fmsg *fmsg, void *priv_ctx,
 			   struct netlink_ext_ack *extack)
+#else
+static int
+qed_fw_fatal_reporter_dump(struct devlink_health_reporter *reporter,
+			   struct devlink_fmsg *fmsg, void *priv_ctx)
+#endif
 {
 	struct qed_devlink *qdl = devlink_health_reporter_priv(reporter);
 	struct qed_fw_fatal_ctx *fw_fatal_ctx = priv_ctx;
@@ -94,11 +104,24 @@ qed_fw_fatal_reporter_dump(struct devlink_health_reporter *reporter,
 		return -ENODATA;
 	}
 
+	//err = devlink_fmsg_binary_pair_put(fmsg, "dump_data",
+	//				   cdev->p_dbg_data_buf,
+	//				   cdev->dbg_data_buf_size);
+	
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 7, 1))
+	devlink_fmsg_binary_pair_put(fmsg, "dump_data",
+					   cdev->p_dbg_data_buf,
+					   cdev->dbg_data_buf_size);
+	err = 0;
+
+	return err;
+#else
 	err = devlink_fmsg_binary_pair_put(fmsg, "dump_data",
 					   cdev->p_dbg_data_buf,
 					   cdev->dbg_data_buf_size);
 
 	return err;
+#endif
 }
 #endif
 
@@ -173,7 +196,8 @@ static int qed_dl_param_get_iwarp_cmt(struct devlink *dl, u32 id,
 }
 
 static int qed_dl_param_set_iwarp_cmt(struct devlink *dl, u32 id,
-				      struct devlink_param_gset_ctx *ctx)
+				      struct devlink_param_gset_ctx *ctx,
+			    	  struct netlink_ext_ack *extack)
 {
 	struct qed_devlink *qed_dl = devlink_priv(dl);
 	struct qed_dev *cdev;
@@ -205,10 +229,15 @@ static int qed_devlink_info_get(struct devlink *devlink,
 
 	dev_info = &cdev->common_dev_info;
 	hwfn = QED_LEADING_HWFN(cdev);
+	//err = devlink_info_driver_name_put(req, KBUILD_MODNAME);
+	//if (err)
+	//	return err;
 
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 2, 1))
 	err = devlink_info_driver_name_put(req, KBUILD_MODNAME);
 	if (err)
 		return err;
+#endif
 
 	memcpy(buf, hwfn->hw_info.part_num, sizeof(hwfn->hw_info.part_num));
 	buf[sizeof(hwfn->hw_info.part_num)] = 0;
@@ -283,9 +312,19 @@ struct devlink *qed_devlink_register(struct qed_dev *cdev, void *drv_ctx)
 
 			value.vbool = false;
 			cdev->iwarp_cmt = false;
+			//devlink_param_driverinit_value_set(dl,
+			//				   QED_DEVLINK_PARAM_ID_IWARP_CMT,
+			//				   value);
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 3, 1))
+			devl_param_driverinit_value_set(dl,
+							   QED_DEVLINK_PARAM_ID_IWARP_CMT,
+							   value);
+#else
 			devlink_param_driverinit_value_set(dl,
 							   QED_DEVLINK_PARAM_ID_IWARP_CMT,
 							   value);
+#endif
 		}
 
 #ifdef _HAS_DEVLINK_PARAMS_PUBLISH

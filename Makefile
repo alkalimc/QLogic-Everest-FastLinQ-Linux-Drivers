@@ -1,21 +1,9 @@
-#QED_DIR := ${PWD}/qed-8.70.12.0/src/
-#QEDE_DIR := ${PWD}/qede-8.70.12.0/src/
-#QEDR_DIR := ${PWD}/qedr-8.70.12.0/src/
-#QEDF_DIR := ${PWD}/qedf-8.70.12.0
-#QEDI_DIR := ${PWD}/qedi-8.70.12.0
-#LIBQEDR_DIR := ${PWD}//
-
-# Dev Dir
-ifeq ($(FASTLINQ_DIR),)
-	FASTLINQ_DIR := /Repositories/PMem/Repositories/QLogic-Everest-FastLinQ-Linux-Drivers
-endif
-
-QED_DIR := ${FASTLINQ_DIR}/qed-8.70.12.0/src/
-QEDE_DIR := ${FASTLINQ_DIR}/qede-8.70.12.0/src/
-QEDR_DIR := ${FASTLINQ_DIR}/qedr-8.70.12.0/src/
-QEDF_DIR := ${FASTLINQ_DIR}/qedf-8.70.12.0
-QEDI_DIR := ${FASTLINQ_DIR}/qedi-8.70.12.0
-LIBQEDR_DIR := ${FASTLINQ_DIR}//
+QED_DIR := ${PWD}/qed-8.70.12.0/src/
+QEDE_DIR := ${PWD}/qede-8.70.12.0/src/
+QEDR_DIR := ${PWD}/qedr-8.70.12.0/src/
+QEDF_DIR := ${PWD}/qedf-8.70.12.0
+QEDI_DIR := ${PWD}/qedi-8.70.12.0
+LIBQEDR_DIR := ${PWD}//
 SUBDIRS := $(QED_DIR) $(QEDE_DIR) $(QEDR_DIR) $(QEDF_DIR) $(QEDI_DIR)
 export QED_DIR
 export QEDE_DIR
