@@ -229,10 +229,15 @@ static int qed_devlink_info_get(struct devlink *devlink,
 
 	dev_info = &cdev->common_dev_info;
 	hwfn = QED_LEADING_HWFN(cdev);
+	//err = devlink_info_driver_name_put(req, KBUILD_MODNAME);
+	//if (err)
+	//	return err;
 
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 2, 1))
 	err = devlink_info_driver_name_put(req, KBUILD_MODNAME);
 	if (err)
 		return err;
+#endif
 
 	memcpy(buf, hwfn->hw_info.part_num, sizeof(hwfn->hw_info.part_num));
 	buf[sizeof(hwfn->hw_info.part_num)] = 0;
