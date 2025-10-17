@@ -574,7 +574,11 @@ static void qed_free_pci(struct qed_dev *cdev)
 {
 	struct pci_dev *pdev = cdev->pdev;
 
+	//pci_disable_pcie_error_reporting(pdev);
+	
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 6, 1))
 	pci_disable_pcie_error_reporting(pdev);
+#endif
 	if (cdev->doorbells && cdev->db_size)
 		iounmap(cdev->doorbells);
 	if (cdev->regview)
