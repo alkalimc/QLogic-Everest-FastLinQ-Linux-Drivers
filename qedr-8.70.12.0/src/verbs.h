@@ -93,14 +93,36 @@ qedr_dealloc_xrcd(struct ib_xrcd *ibxrcd
 
 #ifdef DEFINE_CREATE_CQ_ATTR  /* QEDR_UPSTREAM */
 COMPAT_CREATE_CQ_DECLARE_RET
+//qedr_create_cq(COMPAT_CREATE_CQ_IBDEV(struct ib_device *ibdev)
+//	       COMPAT_CREATE_CQ_CQ(struct ib_cq *ibcq)
+//	       const struct ib_cq_init_attr *attr,
+//	       COMPAT_CREATE_CQ_CTX(struct ib_ucontext *ib_ctx)
+//	       struct ib_udata *udata);
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 11, 1))
+qedr_create_cq(COMPAT_CREATE_CQ_IBDEV(struct ib_device *ibdev)
+	       COMPAT_CREATE_CQ_CQ(struct ib_cq *ibcq)
+	       const struct ib_cq_init_attr *attr,
+	       COMPAT_CREATE_CQ_CTX(struct ib_ucontext *ib_ctx)
+	       struct uverbs_attr_bundle *attrs);
+#else
 qedr_create_cq(COMPAT_CREATE_CQ_IBDEV(struct ib_device *ibdev)
 	       COMPAT_CREATE_CQ_CQ(struct ib_cq *ibcq)
 	       const struct ib_cq_init_attr *attr,
 	       COMPAT_CREATE_CQ_CTX(struct ib_ucontext *ib_ctx)
 	       struct ib_udata *udata);
+#endif
+#else
+//struct ib_cq *qedr_create_cq(struct ib_device *, int entries, int vector,
+//			       struct ib_ucontext *, struct ib_udata *);
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 11, 1))
+struct ib_cq *qedr_create_cq(struct ib_device *, int entries, int vector,
+			       struct ib_ucontext *, struct uverbs_attr_bundle *);
 #else
 struct ib_cq *qedr_create_cq(struct ib_device *, int entries, int vector,
 			       struct ib_ucontext *, struct ib_udata *);
+#endif
 #endif
 
 int qedr_resize_cq(struct ib_cq *, int cqe, struct ib_udata *);
