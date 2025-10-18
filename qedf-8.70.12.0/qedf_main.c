@@ -1376,9 +1376,9 @@ static struct scsi_host_template qedf_host_template = {
 	.queuecommand 	= qedf_queuecommand,
 	//.shost_attrs	= qedf_host_attrs,
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 16, 1))
-	.shost_attrs	= qedf_host_attrs,
-#else
 	.shost_groups	= qedf_host_groups,
+#else
+	.shost_attrs	= qedf_host_attrs,
 #endif
 	.eh_abort_handler	= qedf_eh_abort,
 	.eh_device_reset_handler = qedf_eh_device_reset, /* lun reset */
