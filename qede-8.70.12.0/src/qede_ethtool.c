@@ -1031,7 +1031,13 @@ static void qede_get_drvinfo(struct net_device *ndev,
 	char mbi[ETHTOOL_FWVERS_LEN];
 	struct qede_dev *edev = netdev_priv(ndev);
 
+	//strlcpy(info->driver, DRV_MODULE_NAME, sizeof(info->driver));
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 1))
+	strscpy(info->driver, DRV_MODULE_NAME, sizeof(info->driver));
+#else
 	strlcpy(info->driver, DRV_MODULE_NAME, sizeof(info->driver));
+#endif
 	snprintf(storm, ETHTOOL_FWVERS_LEN, "%d.%d.%d.%d",
 		 edev->dev_info.common.fw_major,
 		 edev->dev_info.common.fw_minor,
