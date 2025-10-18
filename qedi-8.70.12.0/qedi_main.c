@@ -2007,10 +2007,10 @@ static void qedi_scsi_completion(struct qedi_ctx *qedi,
 	//	goto error;
 	//}
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 16, 0))
-	if (!blk_mq_rq_from_pdu(sc_cmd)) {
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 15, 1))
+	if (!scsi_cmd_to_rq(sc_cmd)) {
 		QEDI_WARN(&qedi->dbg_ctx,
-			  "blk_mq_rq_from_pdu(sc_cmd) is NULL, sc_cmd=%p.\n",
+			  "scsi_cmd_to_rq(sc_cmd) is NULL, sc_cmd=%p.\n",
 			  sc_cmd);
 		goto error;
 	}
@@ -2031,10 +2031,10 @@ static void qedi_scsi_completion(struct qedi_ctx *qedi,
 	//	goto error;
 	//}
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 16, 0))
-	if (!blk_mq_rq_from_pdu(sc_cmd)->special) {
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 15, 1))
+	if (!scsi_cmd_to_rq(sc_cmd)->special) {
 		QEDI_WARN(&qedi->dbg_ctx,
-			  "blk_mq_rq_from_pdu(sc_cmd)->special is NULL so request not valid, sc_cmd=%p.\n",
+			  "scsi_cmd_to_rq(sc_cmd)->special is NULL so request not valid, sc_cmd=%p.\n",
 			  sc_cmd);
 		goto error;
 	}
@@ -2055,10 +2055,10 @@ static void qedi_scsi_completion(struct qedi_ctx *qedi,
 	//	goto error;
 	//}
 	
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 16, 0))
-	if (!blk_mq_rq_from_pdu(sc_cmd)->q) {
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 15, 1))
+	if (!scsi_cmd_to_rq(sc_cmd)->q) {
 		QEDI_WARN(&qedi->dbg_ctx,
-			  "blk_mq_rq_from_pdu(sc_cmd)->q is NULL so request is not valid, sc_cmd=%p.\n",
+			  "scsi_cmd_to_rq(sc_cmd)->q is NULL so request is not valid, sc_cmd=%p.\n",
 			  sc_cmd);
 		goto error;
 	}
