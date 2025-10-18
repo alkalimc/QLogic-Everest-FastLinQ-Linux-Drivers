@@ -2000,14 +2000,45 @@ static void qedi_scsi_completion(struct qedi_ctx *qedi,
 		goto error;
 	}
 
+	//if (!sc_cmd->request) {
+	//	QEDI_WARN(&qedi->dbg_ctx,
+	//		  "sc_cmd->request is NULL, sc_cmd=%p.\n",
+	//		  sc_cmd);
+	//	goto error;
+	//}
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 16, 0))
+	if (!blk_mq_rq_from_pdu(sc_cmd)) {
+		QEDI_WARN(&qedi->dbg_ctx,
+			  "blk_mq_rq_from_pdu(sc_cmd) is NULL, sc_cmd=%p.\n",
+			  sc_cmd);
+		goto error;
+	}
+#else
 	if (!sc_cmd->request) {
 		QEDI_WARN(&qedi->dbg_ctx,
 			  "sc_cmd->request is NULL, sc_cmd=%p.\n",
 			  sc_cmd);
 		goto error;
 	}
+#endif
 
 #if defined BLK_DEV_SPECIAL
+	//if (!sc_cmd->request->special) {
+	//	QEDI_WARN(&qedi->dbg_ctx,
+	//		  "request->special is NULL so request not valid, sc_cmd=%p.\n",
+	//		  sc_cmd);
+	//	goto error;
+	//}
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 16, 0))
+	if (!blk_mq_rq_from_pdu(sc_cmd)->special) {
+		QEDI_WARN(&qedi->dbg_ctx,
+			  "blk_mq_rq_from_pdu(sc_cmd)->special is NULL so request not valid, sc_cmd=%p.\n",
+			  sc_cmd);
+		goto error;
+	}
+#else
 	if (!sc_cmd->request->special) {
 		QEDI_WARN(&qedi->dbg_ctx,
 			  "request->special is NULL so request not valid, sc_cmd=%p.\n",
@@ -2015,13 +2046,30 @@ static void qedi_scsi_completion(struct qedi_ctx *qedi,
 		goto error;
 	}
 #endif
+#endif
 
+	//if (!sc_cmd->request->q) {
+	//	QEDI_WARN(&qedi->dbg_ctx,
+	//		  "request->q is NULL so request is not valid, sc_cmd=%p.\n",
+	//		  sc_cmd);
+	//	goto error;
+	//}
+	
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 16, 0))
+	if (!blk_mq_rq_from_pdu(sc_cmd)->q) {
+		QEDI_WARN(&qedi->dbg_ctx,
+			  "blk_mq_rq_from_pdu(sc_cmd)->q is NULL so request is not valid, sc_cmd=%p.\n",
+			  sc_cmd);
+		goto error;
+	}
+#else
 	if (!sc_cmd->request->q) {
 		QEDI_WARN(&qedi->dbg_ctx,
 			  "request->q is NULL so request is not valid, sc_cmd=%p.\n",
 			  sc_cmd);
 		goto error;
 	}
+#endif
 
 #if defined STRUCT_SCSI_RSP
 	hdr = (struct iscsi_scsi_rsp *)task->hdr;

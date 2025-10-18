@@ -634,7 +634,13 @@ static void  qedf_init_task(struct qedf_rport *fcport, struct fc_lport *lport,
 
 #elif defined(NR_HW_QUEUES) && defined(USE_BLK_MQ)
 	if (shost_use_blk_mq(qedf->lport->host)) {
+		//uniq_tag = blk_mq_unique_tag(sc_cmd->request);
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 16, 0))
+		uniq_tag = blk_mq_unique_tag(blk_mq_rq_from_pdu(sc_cmd));
+#else
 		uniq_tag = blk_mq_unique_tag(sc_cmd->request);
+#endif
 		hwq = blk_mq_unique_tag_to_hwq(uniq_tag);
 		/* If blk-mq is enabled, use the hardware queue id */
 		cq_idx = hwq;
@@ -1304,25 +1310,67 @@ void qedf_scsi_completion(struct qedf_ctx *qedf, struct fcoe_cqe *cqe,
 		return;
 	}
 
+	//if (!sc_cmd->request) {
+	//	QEDF_WARN(&(qedf->dbg_ctx), "sc_cmd->request is NULL, "
+	//	    "sc_cmd=%px.\n", sc_cmd);
+	//	return;
+	//}
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 16, 0))
+	if (!blk_mq_rq_from_pdu(sc_cmd)) {
+		QEDF_WARN(&(qedf->dbg_ctx), "blk_mq_rq_from_pdu(sc_cmd) is NULL, "
+		    "sc_cmd=%px.\n", sc_cmd);
+		return;
+	}
+#else
 	if (!sc_cmd->request) {
 		QEDF_WARN(&(qedf->dbg_ctx), "sc_cmd->request is NULL, "
 		    "sc_cmd=%px.\n", sc_cmd);
 		return;
 	}
+#endif
 
 #ifdef BLK_DEV_SPECIAL
+	//if (!sc_cmd->request->special) {
+	//	QEDF_WARN(&(qedf->dbg_ctx), "request->special is NULL so "
+	//	    "request not valid, sc_cmd=%px.\n", sc_cmd);
+	//	return;
+	//}
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 16, 0))
+	if (!blk_mq_rq_from_pdu(sc_cmd)->special) {
+		QEDF_WARN(&(qedf->dbg_ctx), "blk_mq_rq_from_pdu(sc_cmd)->special is NULL so "
+		    "request not valid, sc_cmd=%px.\n", sc_cmd);
+		return;
+	}
+#else
 	if (!sc_cmd->request->special) {
 		QEDF_WARN(&(qedf->dbg_ctx), "request->special is NULL so "
 		    "request not valid, sc_cmd=%px.\n", sc_cmd);
 		return;
 	}
 #endif
+#endif
 
+	//if (!sc_cmd->request->q) {
+	//	QEDF_WARN(&(qedf->dbg_ctx), "request->q is NULL so request "
+	//	   "is not valid, sc_cmd=%px.\n", sc_cmd);
+	//	return;
+	//}
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 16, 0))
+	if (!blk_mq_rq_from_pdu(sc_cmd)->q) {
+		QEDF_WARN(&(qedf->dbg_ctx), "blk_mq_rq_from_pdu(sc_cmd)->q is NULL so request "
+		   "is not valid, sc_cmd=%px.\n", sc_cmd);
+		return;
+	}
+#else
 	if (!sc_cmd->request->q) {
 		QEDF_WARN(&(qedf->dbg_ctx), "request->q is NULL so request "
 		   "is not valid, sc_cmd=%px.\n", sc_cmd);
 		return;
 	}
+#endif
 
 	fcport = io_req->fcport;
 
