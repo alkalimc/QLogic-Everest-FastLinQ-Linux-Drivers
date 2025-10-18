@@ -1813,8 +1813,16 @@ static int qede_set_channels(struct net_device *dev,
 #endif
 
 #if HAS_ETHTOOL(TS_INFO) /* QEDE_UPSTREAM */
+//static int qede_get_ts_info(struct net_device *dev,
+//			    struct ethtool_ts_info *info)
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 11, 1))
+static int qede_get_ts_info(struct net_device *dev,
+			    struct kernel_ethtool_ts_info *info)
+#else
 static int qede_get_ts_info(struct net_device *dev,
 			    struct ethtool_ts_info *info)
+#endif
 {
 	struct qede_dev *edev = netdev_priv(dev);
 

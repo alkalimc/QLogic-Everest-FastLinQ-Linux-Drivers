@@ -389,6 +389,95 @@ int qede_ptp_hw_ts(struct qede_dev *edev, struct ifreq *ifr)
 			    sizeof(config)) ? -EFAULT : 0;
 }
 
+//int qede_ptp_get_ts_info(struct qede_dev *edev, struct ethtool_ts_info *info)
+//{
+//	struct qede_ptp *ptp = edev->ptp;
+//
+//	if (!ptp) {
+//		info->so_timestamping = SOF_TIMESTAMPING_TX_SOFTWARE |
+//					SOF_TIMESTAMPING_RX_SOFTWARE |
+//					SOF_TIMESTAMPING_SOFTWARE;
+//		info->phc_index = -1;
+//
+//		return 0;
+//	}
+//
+//	info->so_timestamping = SOF_TIMESTAMPING_TX_SOFTWARE |
+//				SOF_TIMESTAMPING_RX_SOFTWARE |
+//				SOF_TIMESTAMPING_SOFTWARE |
+//				SOF_TIMESTAMPING_TX_HARDWARE |
+//				SOF_TIMESTAMPING_RX_HARDWARE |
+//				SOF_TIMESTAMPING_RAW_HARDWARE;
+//
+//	if (ptp->clock)
+//		info->phc_index = ptp_clock_index(ptp->clock);
+//	else
+//		info->phc_index = -1;
+//
+//	info->rx_filters = BIT(HWTSTAMP_FILTER_NONE) |
+//			   BIT(HWTSTAMP_FILTER_PTP_V1_L4_EVENT) |
+//			   BIT(HWTSTAMP_FILTER_PTP_V1_L4_SYNC) |
+//			   BIT(HWTSTAMP_FILTER_PTP_V1_L4_DELAY_REQ) |
+//			   BIT(HWTSTAMP_FILTER_PTP_V2_L4_EVENT) |
+//			   BIT(HWTSTAMP_FILTER_PTP_V2_L4_SYNC) |
+//			   BIT(HWTSTAMP_FILTER_PTP_V2_L4_DELAY_REQ) |
+//			   BIT(HWTSTAMP_FILTER_PTP_V2_L2_EVENT) |
+//			   BIT(HWTSTAMP_FILTER_PTP_V2_L2_SYNC) |
+//			   BIT(HWTSTAMP_FILTER_PTP_V2_L2_DELAY_REQ) |
+//			   BIT(HWTSTAMP_FILTER_PTP_V2_EVENT) |
+//			   BIT(HWTSTAMP_FILTER_PTP_V2_SYNC) |
+//			   BIT(HWTSTAMP_FILTER_PTP_V2_DELAY_REQ);
+//
+//	info->tx_types = BIT(HWTSTAMP_TX_OFF) | BIT(HWTSTAMP_TX_ON);
+//
+//	return 0;
+//}
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 11, 1))
+int qede_ptp_get_ts_info(struct qede_dev *edev, struct kernel_ethtool_ts_info *info)
+{
+	struct qede_ptp *ptp = edev->ptp;
+
+	if (!ptp) {
+		info->so_timestamping = SOF_TIMESTAMPING_TX_SOFTWARE |
+					SOF_TIMESTAMPING_RX_SOFTWARE |
+					SOF_TIMESTAMPING_SOFTWARE;
+		info->phc_index = -1;
+
+		return 0;
+	}
+
+	info->so_timestamping = SOF_TIMESTAMPING_TX_SOFTWARE |
+				SOF_TIMESTAMPING_RX_SOFTWARE |
+				SOF_TIMESTAMPING_SOFTWARE |
+				SOF_TIMESTAMPING_TX_HARDWARE |
+				SOF_TIMESTAMPING_RX_HARDWARE |
+				SOF_TIMESTAMPING_RAW_HARDWARE;
+
+	if (ptp->clock)
+		info->phc_index = ptp_clock_index(ptp->clock);
+	else
+		info->phc_index = -1;
+
+	info->rx_filters = BIT(HWTSTAMP_FILTER_NONE) |
+			   BIT(HWTSTAMP_FILTER_PTP_V1_L4_EVENT) |
+			   BIT(HWTSTAMP_FILTER_PTP_V1_L4_SYNC) |
+			   BIT(HWTSTAMP_FILTER_PTP_V1_L4_DELAY_REQ) |
+			   BIT(HWTSTAMP_FILTER_PTP_V2_L4_EVENT) |
+			   BIT(HWTSTAMP_FILTER_PTP_V2_L4_SYNC) |
+			   BIT(HWTSTAMP_FILTER_PTP_V2_L4_DELAY_REQ) |
+			   BIT(HWTSTAMP_FILTER_PTP_V2_L2_EVENT) |
+			   BIT(HWTSTAMP_FILTER_PTP_V2_L2_SYNC) |
+			   BIT(HWTSTAMP_FILTER_PTP_V2_L2_DELAY_REQ) |
+			   BIT(HWTSTAMP_FILTER_PTP_V2_EVENT) |
+			   BIT(HWTSTAMP_FILTER_PTP_V2_SYNC) |
+			   BIT(HWTSTAMP_FILTER_PTP_V2_DELAY_REQ);
+
+	info->tx_types = BIT(HWTSTAMP_TX_OFF) | BIT(HWTSTAMP_TX_ON);
+
+	return 0;
+}
+#else
 int qede_ptp_get_ts_info(struct qede_dev *edev, struct ethtool_ts_info *info)
 {
 	struct qede_ptp *ptp = edev->ptp;
@@ -432,6 +521,7 @@ int qede_ptp_get_ts_info(struct qede_dev *edev, struct ethtool_ts_info *info)
 
 	return 0;
 }
+#endif
 
 void qede_ptp_disable(struct qede_dev *edev)
 {
