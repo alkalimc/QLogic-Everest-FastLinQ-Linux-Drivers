@@ -138,8 +138,15 @@ qedf_uevent_emit(struct Scsi_Host *shost, u32 code, char *msg)
 	memset(event_string, 0, sizeof(event_string));
 	switch (code) {
 	case QEDF_UEVENT_CODE_GRCDUMP:
+		//if (msg)
+		//	strlcpy(event_string, msg, strlen(msg));
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 1))
+		if (msg)
+			strscpy(event_string, msg, strlen(msg));
+#else
 		if (msg)
 			strlcpy(event_string, msg, strlen(msg));
+#endif
 		else
 			sprintf(event_string, "GRCDUMP=%u", shost->host_no);
 		break;
