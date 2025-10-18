@@ -1304,11 +1304,25 @@ void qedf_scsi_completion(struct qedf_ctx *qedf, struct fcoe_cqe *cqe,
 		return;
 	}
 
+	//if (!sc_cmd->SCp.ptr) {
+	//	QEDF_WARN(&(qedf->dbg_ctx), "SCp.ptr is NULL, returned in "
+	//	    "another context.\n");
+	//	return;
+	//}
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 18, 1))
+	if (!((struct scsi_pointer *)scsi_cmd_priv(sc_cmd))->ptr) {
+		QEDF_WARN(&(qedf->dbg_ctx), "((struct scsi_pointer *)scsi_cmd_priv(sc_cmd))->ptrs is NULL, returned in "
+		    "another context.\n");
+		return;
+	}
+#else
 	if (!sc_cmd->SCp.ptr) {
 		QEDF_WARN(&(qedf->dbg_ctx), "SCp.ptr is NULL, returned in "
 		    "another context.\n");
 		return;
 	}
+#endif
 
 	if (!sc_cmd->device) {
 		QEDF_ERR(&qedf->dbg_ctx, "Device for sc_cmd %px is NULL.\n",
@@ -1536,7 +1550,13 @@ out:
 	clear_bit(QEDF_CMD_OUTSTANDING, &io_req->flags);
 
 	io_req->sc_cmd = NULL;
+	//sc_cmd->SCp.ptr =  NULL;
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 18, 1))
+	((struct scsi_pointer *)scsi_cmd_priv(sc_cmd))->ptr =  NULL;
+#else
 	sc_cmd->SCp.ptr =  NULL;
+#endif
 	sc_cmd->scsi_done(sc_cmd);
 	kref_put(&io_req->refcount, qedf_release_cmd);
 }
@@ -1580,11 +1600,25 @@ void qedf_scsi_done(struct qedf_ctx *qedf, struct qedf_ioreq *io_req,
 		goto bad_scsi_ptr;
 	}
 
+	//if (!sc_cmd->SCp.ptr) {
+	//	QEDF_WARN(&(qedf->dbg_ctx), "SCp.ptr is NULL, returned in "
+	//	    "another context.\n");
+	//	return;
+	//}
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 18, 1))
+	if (!((struct scsi_pointer *)scsi_cmd_priv(sc_cmd))->ptr) {
+		QEDF_WARN(&(qedf->dbg_ctx), "((struct scsi_pointer *)scsi_cmd_priv(sc_cmd))->ptr is NULL, returned in "
+		    "another context.\n");
+		return;
+	}
+#else
 	if (!sc_cmd->SCp.ptr) {
 		QEDF_WARN(&(qedf->dbg_ctx), "SCp.ptr is NULL, returned in "
 		    "another context.\n");
 		return;
 	}
+#endif
 
 	/*
 	 * Check validity of scsi_cmnd back pointer
@@ -1650,7 +1684,13 @@ void qedf_scsi_done(struct qedf_ctx *qedf, struct qedf_ioreq *io_req,
 		qedf_trace_io(io_req->fcport, io_req, QEDF_IO_TRACE_RSP);
 
 	io_req->sc_cmd = NULL;
+	//sc_cmd->SCp.ptr = NULL;
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 18, 1))
+	((struct scsi_pointer *)scsi_cmd_priv(sc_cmd))->ptr = NULL;
+#else
 	sc_cmd->SCp.ptr = NULL;
+#endif
 	sc_cmd->scsi_done(sc_cmd);
 	kref_put(&io_req->refcount, qedf_release_cmd);
 	return;
@@ -2761,8 +2801,16 @@ int qedf_initiate_tmf(struct scsi_cmnd *sc_cmd, u8 tm_flags)
 	    (tm_flags == FCP_TMF_TGT_RESET) ? "TARGET RESET" : "LUN RESET");
 
 
+	//if (sc_cmd->SCp.ptr) {
+	//	io_req = (struct qedf_ioreq *)sc_cmd->SCp.ptr;
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 18, 1))
+	if (((struct scsi_pointer *)scsi_cmd_priv(sc_cmd))->ptr) {
+		io_req = (struct qedf_ioreq *)((struct scsi_pointer *)scsi_cmd_priv(sc_cmd))->ptr;
+#else
 	if (sc_cmd->SCp.ptr) {
 		io_req = (struct qedf_ioreq *)sc_cmd->SCp.ptr;
+#endif
 #ifdef KREF_READ
 		ref_cnt = kref_read(&io_req->refcount);
 #else

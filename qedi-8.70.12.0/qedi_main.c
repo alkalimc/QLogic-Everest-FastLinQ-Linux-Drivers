@@ -1994,11 +1994,25 @@ static void qedi_scsi_completion(struct qedi_ctx *qedi,
 		goto error;
 	}
 
+	//if (!sc_cmd->SCp.ptr) {
+	//	QEDI_WARN(&qedi->dbg_ctx,
+	//		  "SCp.ptr is NULL, returned in another context.\n");
+	//	goto error;
+	//}
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 18, 1))
+	if (!((struct scsi_pointer *)scsi_cmd_priv(sc_cmd))->ptr) {
+		QEDI_WARN(&qedi->dbg_ctx,
+			  "((struct scsi_pointer *)scsi_cmd_priv(sc_cmd))->ptr is NULL, returned in another context.\n");
+		goto error;
+	}
+#else
 	if (!sc_cmd->SCp.ptr) {
 		QEDI_WARN(&qedi->dbg_ctx,
 			  "SCp.ptr is NULL, returned in another context.\n");
 		goto error;
 	}
+#endif
 
 	//if (!sc_cmd->request) {
 	//	QEDI_WARN(&qedi->dbg_ctx,

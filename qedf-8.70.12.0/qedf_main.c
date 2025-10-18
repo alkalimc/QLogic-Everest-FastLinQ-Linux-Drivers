@@ -1065,7 +1065,14 @@ static int qedf_eh_abort(struct scsi_cmnd *sc_cmd)
 	}
 
 
+	//io_req = (struct qedf_ioreq *)sc_cmd->SCp.ptr;
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 18, 1))
+	io_req = (struct qedf_ioreq *)((struct scsi_pointer *)scsi_cmd_priv(sc_cmd))->ptr;
+#else
 	io_req = (struct qedf_ioreq *)sc_cmd->SCp.ptr;
+#endif
+
 	if (!io_req) {
 		QEDF_ERR(&(qedf->dbg_ctx), "sc_cmd not queued with lld, sc_cmd=%px,"
 			" op=0x%02x, port_id=%06x\n", sc_cmd, sc_cmd->cmnd[0],
