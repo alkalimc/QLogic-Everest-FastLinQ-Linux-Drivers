@@ -1106,7 +1106,13 @@ qedf_queuecommand(struct scsi_cmnd *sc_cmd, void (*done)(struct scsi_cmnd *))
 		    "Returning DNC as unloading or stop io, flags 0x%lx.\n",
 		    qedf->flags);
 		sc_cmd->result = DID_NO_CONNECT << 16;
+		//sc_cmd->scsi_done(sc_cmd);
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 16, 1))
+		scsi_done(sc_cmd);
+#else
 		sc_cmd->scsi_done(sc_cmd);
+#endif
 		return 0;
 	}
 
@@ -1115,7 +1121,13 @@ qedf_queuecommand(struct scsi_cmnd *sc_cmd, void (*done)(struct scsi_cmnd *))
 		    "Completing sc_cmd=%px DID_NO_CONNECT as MSI-X is not enabled.\n",
 		    sc_cmd);
 		sc_cmd->result = DID_NO_CONNECT << 16;
+		//sc_cmd->scsi_done(sc_cmd);
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 16, 1))
+		scsi_done(sc_cmd);
+#else
 		sc_cmd->scsi_done(sc_cmd);
+#endif
 		return 0;
 	}
 
@@ -1125,7 +1137,13 @@ qedf_queuecommand(struct scsi_cmnd *sc_cmd, void (*done)(struct scsi_cmnd *))
 		    "fc_remote_port_chkready failed=0x%x for port_id=0x%06x.\n",
 		    rval, rport->port_id);
 		sc_cmd->result = rval;
+		//sc_cmd->scsi_done(sc_cmd);
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 16, 1))
+		scsi_done(sc_cmd);
+#else
 		sc_cmd->scsi_done(sc_cmd);
+#endif
 		return 0;
 	}
 
@@ -1563,7 +1581,13 @@ out:
 #else
 	sc_cmd->SCp.ptr =  NULL;
 #endif
+	//sc_cmd->scsi_done(sc_cmd);
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 16, 1))
+	scsi_done(sc_cmd);
+#else
 	sc_cmd->scsi_done(sc_cmd);
+#endif
 	kref_put(&io_req->refcount, qedf_release_cmd);
 }
 
@@ -1697,7 +1721,13 @@ void qedf_scsi_done(struct qedf_ctx *qedf, struct qedf_ioreq *io_req,
 #else
 	sc_cmd->SCp.ptr = NULL;
 #endif
+	//sc_cmd->scsi_done(sc_cmd);
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 16, 1))
+	scsi_done(sc_cmd);
+#else
 	sc_cmd->scsi_done(sc_cmd);
+#endif
 	kref_put(&io_req->refcount, qedf_release_cmd);
 	return;
 
