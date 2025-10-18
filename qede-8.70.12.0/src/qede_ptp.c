@@ -60,6 +60,38 @@ struct qede_ptp {
 	u16				rx_filter;
 };
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 2, 1))
+/**
+ * qede_ptp_adjfine
+ * @ptp: the ptp clock structure
+ * @scaled_ppm: Scaled parts per million adjustment from base.
+ *
+ * Scaled parts per million is ppm with a 16-bit binary fractional field.
+ *
+ * Adjust the frequency of the ptp cycle counter by the
+ * indicated ppb from the base frequency.
+ */
+static int qede_ptp_adjfine(struct ptp_clock_info *info, long scaled_ppm)
+{
+	struct qede_ptp *ptp = container_of(info, struct qede_ptp, clock_info);
+	s32 ppb = scaled_ppm_to_ppb(scaled_ppm);
+	struct qede_dev *edev = ptp->edev;
+	int rc;
+
+	__qede_lock(edev);
+	if (edev->state == QEDE_STATE_OPEN) {
+		spin_lock_bh(&ptp->lock);
+		rc = ptp->ops->adjfreq(edev->cdev, ppb);
+		spin_unlock_bh(&ptp->lock);
+	} else {
+		DP_ERR(edev, "PTP adjfine called while interface is down\n");
+		rc = -EFAULT;
+	}
+	__qede_unlock(edev);
+
+	return rc;
+}
+#else
 /**
  * qede_ptp_adjfreq
  * @ptp: the ptp clock structure
@@ -87,6 +119,7 @@ static int qede_ptp_adjfreq(struct ptp_clock_info *info, s32 ppb)
 
 	return rc;
 }
+#endif
 
 static int qede_ptp_adjtime(struct ptp_clock_info *info, s64 delta)
 {
@@ -625,7 +658,12 @@ int qede_ptp_enable(struct qede_dev *edev)
 	ptp->clock_info.n_ext_ts = 0;
 	ptp->clock_info.n_per_out = 0;
 	ptp->clock_info.pps = 0;
+	//ptp->clock_info.adjfreq = qede_ptp_adjfreq;
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 2, 1))
+	ptp->clock_info.adjfine = qede_ptp_adjfine;
+#else
 	ptp->clock_info.adjfreq = qede_ptp_adjfreq;
+#endif
 	ptp->clock_info.adjtime = qede_ptp_adjtime;
 #ifdef _HAS_PTPTIME64 /* QEDE_UPSTREAM */
 	ptp->clock_info.gettime64 = qede_ptp_gettime;
