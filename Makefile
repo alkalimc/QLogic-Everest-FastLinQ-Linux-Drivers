@@ -1,9 +1,9 @@
-QED_DIR := ${PWD}/qed-8.70.12.0/src/
-QEDE_DIR := ${PWD}/qede-8.70.12.0/src/
-QEDR_DIR := ${PWD}/qedr-8.70.12.0/src/
-QEDF_DIR := ${PWD}/qedf-8.70.12.0
-QEDI_DIR := ${PWD}/qedi-8.70.12.0
-LIBQEDR_DIR := ${PWD}//
+QED_DIR := $(CURDIR)/qed-8.70.12.0/src/
+QEDE_DIR := $(CURDIR)/qede-8.70.12.0/src/
+QEDR_DIR := $(CURDIR)/qedr-8.70.12.0/src/
+QEDF_DIR := $(CURDIR)/qedf-8.70.12.0
+QEDI_DIR := $(CURDIR)/qedi-8.70.12.0
+LIBQEDR_DIR := $(CURDIR)//
 SUBDIRS := $(QED_DIR) $(QEDE_DIR) $(QEDR_DIR) $(QEDF_DIR) $(QEDI_DIR)
 export QED_DIR
 export QEDE_DIR

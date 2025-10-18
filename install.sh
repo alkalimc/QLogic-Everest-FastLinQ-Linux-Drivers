@@ -42,7 +42,6 @@ unset KERNEL_VER
 
 cd $FASTLINQ_DIR
 make clean -C $FASTLINQ_DIR -j$N_PROC
-make -C $FASTLINQ_DIR -j$N_PROC
 sudo make install -C $FASTLINQ_DIR -j$N_PROC
 
 unset FASTLINQ_DIR

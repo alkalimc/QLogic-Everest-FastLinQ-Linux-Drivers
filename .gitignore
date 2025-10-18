@@ -1,5 +1,6 @@
-# qedf files
+# qed files
 *.h
+*.conf
 
 # VS Code
 .vscode
