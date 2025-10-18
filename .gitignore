@@ -1,3 +1,6 @@
+# qedf files
+*.h
+
 # VS Code
 .vscode
 
