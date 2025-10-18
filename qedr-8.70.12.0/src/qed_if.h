@@ -51,6 +51,7 @@
 #include <linux/spinlock.h>
 #include <linux/string.h>
 #include <linux/version.h>
+#include <linux/sched/clock.h>
 #include "qed_chain.h"
 enum dcbx_protocol_type {
 	DCBX_PROTOCOL_ISCSI,

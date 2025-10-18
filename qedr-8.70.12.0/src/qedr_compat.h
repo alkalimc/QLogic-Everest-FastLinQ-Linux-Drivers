@@ -898,14 +898,36 @@ struct ib_device_ops {
 			int qp_attr_mask, struct ib_qp_init_attr *qp_init_attr);
 	int (*destroy_qp)(struct ib_qp *qp);
 #ifdef DEFINE_CREATE_CQ_ATTR  /* QEDR_UPSTREAM */
+	//struct ib_cq *(*create_cq)(struct ib_device *device,
+	//			   const struct ib_cq_init_attr *attr,
+	//			   struct ib_ucontext *context,
+	//			   struct ib_udata *udata);
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 11, 1))
+	struct ib_cq *(*create_cq)(struct ib_device *device,
+				   const struct ib_cq_init_attr *attr,
+				   struct ib_ucontext *context,
+				   struct uverbs_attr_bundle *attrs);
+#else
 	struct ib_cq *(*create_cq)(struct ib_device *device,
 				   const struct ib_cq_init_attr *attr,
 				   struct ib_ucontext *context,
 				   struct ib_udata *udata);
+#endif
+#else
+	//struct ib_cq *(*create_cq)(struct ib_device *ibdev, int entries, int vector,
+	//			   struct ib_ucontext *ib_ctx,
+	//			   struct ib_udata *udata);
+	
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 11, 1))
+	struct ib_cq *(*create_cq)(struct ib_device *ibdev, int entries, int vector,
+				   struct ib_ucontext *ib_ctx,
+				   struct uverbs_attr_bundle *attrs);
 #else
 	struct ib_cq *(*create_cq)(struct ib_device *ibdev, int entries, int vector,
 				   struct ib_ucontext *ib_ctx,
 				   struct ib_udata *udata);
+#endif
 #endif
 
 	int (*modify_cq)(struct ib_cq *cq, u16 cq_count, u16 cq_period);

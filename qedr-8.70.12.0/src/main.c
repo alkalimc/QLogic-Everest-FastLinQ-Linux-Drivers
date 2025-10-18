@@ -729,12 +729,28 @@ static int qedr_register_device(struct qedr_dev *dev, bool lag_enabled)
 	u8 name[IB_DEVICE_NAME_MAX];
 	int rc;
 
+	//if (lag_enabled)
+	//	strlcpy(name, "qedr_bond%d", IB_DEVICE_NAME_MAX);
+	//else if (dev->is_vf)
+	//	strlcpy(name, "qedr_vf%d", IB_DEVICE_NAME_MAX);
+	//else
+	//	strlcpy(name, "qedr%d", IB_DEVICE_NAME_MAX);
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 1))
+	if (lag_enabled)
+		strscpy(name, "qedr_bond%d", IB_DEVICE_NAME_MAX);
+	else if (dev->is_vf)
+		strscpy(name, "qedr_vf%d", IB_DEVICE_NAME_MAX);
+	else
+		strscpy(name, "qedr%d", IB_DEVICE_NAME_MAX);
+#else
 	if (lag_enabled)
 		strlcpy(name, "qedr_bond%d", IB_DEVICE_NAME_MAX);
 	else if (dev->is_vf)
 		strlcpy(name, "qedr_vf%d", IB_DEVICE_NAME_MAX);
 	else
 		strlcpy(name, "qedr%d", IB_DEVICE_NAME_MAX);
+#endif
 
 	dev->ibdev.node_guid = dev->attr.node_guid;
 	memcpy(dev->ibdev.node_desc, QEDR_NODE_DESC, sizeof(QEDR_NODE_DESC));
