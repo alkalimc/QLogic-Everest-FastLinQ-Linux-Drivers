@@ -1,3 +1,5 @@
+DISABLE_WERROR = 0
+
 ifeq ($(QED_DIR),)
 	override QED_DIR = $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/../../qed-8.70.12.0/src
 endif

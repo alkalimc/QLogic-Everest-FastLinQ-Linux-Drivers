@@ -60,6 +60,38 @@ struct qede_ptp {
 	u16				rx_filter;
 };
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 2, 1))
+/**
+ * qede_ptp_adjfine
+ * @ptp: the ptp clock structure
+ * @scaled_ppm: Scaled parts per million adjustment from base.
+ *
+ * Scaled parts per million is ppm with a 16-bit binary fractional field.
+ *
+ * Adjust the frequency of the ptp cycle counter by the
+ * indicated ppb from the base frequency.
+ */
+static int qede_ptp_adjfine(struct ptp_clock_info *info, long scaled_ppm)
+{
+	struct qede_ptp *ptp = container_of(info, struct qede_ptp, clock_info);
+	s32 ppb = scaled_ppm_to_ppb(scaled_ppm);
+	struct qede_dev *edev = ptp->edev;
+	int rc;
+
+	__qede_lock(edev);
+	if (edev->state == QEDE_STATE_OPEN) {
+		spin_lock_bh(&ptp->lock);
+		rc = ptp->ops->adjfreq(edev->cdev, ppb);
+		spin_unlock_bh(&ptp->lock);
+	} else {
+		DP_ERR(edev, "PTP adjfine called while interface is down\n");
+		rc = -EFAULT;
+	}
+	__qede_unlock(edev);
+
+	return rc;
+}
+#else
 /**
  * qede_ptp_adjfreq
  * @ptp: the ptp clock structure
@@ -87,6 +119,7 @@ static int qede_ptp_adjfreq(struct ptp_clock_info *info, s32 ppb)
 
 	return rc;
 }
+#endif
 
 static int qede_ptp_adjtime(struct ptp_clock_info *info, s64 delta)
 {
@@ -389,6 +422,95 @@ int qede_ptp_hw_ts(struct qede_dev *edev, struct ifreq *ifr)
 			    sizeof(config)) ? -EFAULT : 0;
 }
 
+//int qede_ptp_get_ts_info(struct qede_dev *edev, struct ethtool_ts_info *info)
+//{
+//	struct qede_ptp *ptp = edev->ptp;
+//
+//	if (!ptp) {
+//		info->so_timestamping = SOF_TIMESTAMPING_TX_SOFTWARE |
+//					SOF_TIMESTAMPING_RX_SOFTWARE |
+//					SOF_TIMESTAMPING_SOFTWARE;
+//		info->phc_index = -1;
+//
+//		return 0;
+//	}
+//
+//	info->so_timestamping = SOF_TIMESTAMPING_TX_SOFTWARE |
+//				SOF_TIMESTAMPING_RX_SOFTWARE |
+//				SOF_TIMESTAMPING_SOFTWARE |
+//				SOF_TIMESTAMPING_TX_HARDWARE |
+//				SOF_TIMESTAMPING_RX_HARDWARE |
+//				SOF_TIMESTAMPING_RAW_HARDWARE;
+//
+//	if (ptp->clock)
+//		info->phc_index = ptp_clock_index(ptp->clock);
+//	else
+//		info->phc_index = -1;
+//
+//	info->rx_filters = BIT(HWTSTAMP_FILTER_NONE) |
+//			   BIT(HWTSTAMP_FILTER_PTP_V1_L4_EVENT) |
+//			   BIT(HWTSTAMP_FILTER_PTP_V1_L4_SYNC) |
+//			   BIT(HWTSTAMP_FILTER_PTP_V1_L4_DELAY_REQ) |
+//			   BIT(HWTSTAMP_FILTER_PTP_V2_L4_EVENT) |
+//			   BIT(HWTSTAMP_FILTER_PTP_V2_L4_SYNC) |
+//			   BIT(HWTSTAMP_FILTER_PTP_V2_L4_DELAY_REQ) |
+//			   BIT(HWTSTAMP_FILTER_PTP_V2_L2_EVENT) |
+//			   BIT(HWTSTAMP_FILTER_PTP_V2_L2_SYNC) |
+//			   BIT(HWTSTAMP_FILTER_PTP_V2_L2_DELAY_REQ) |
+//			   BIT(HWTSTAMP_FILTER_PTP_V2_EVENT) |
+//			   BIT(HWTSTAMP_FILTER_PTP_V2_SYNC) |
+//			   BIT(HWTSTAMP_FILTER_PTP_V2_DELAY_REQ);
+//
+//	info->tx_types = BIT(HWTSTAMP_TX_OFF) | BIT(HWTSTAMP_TX_ON);
+//
+//	return 0;
+//}
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 11, 1))
+int qede_ptp_get_ts_info(struct qede_dev *edev, struct kernel_ethtool_ts_info *info)
+{
+	struct qede_ptp *ptp = edev->ptp;
+
+	if (!ptp) {
+		info->so_timestamping = SOF_TIMESTAMPING_TX_SOFTWARE |
+					SOF_TIMESTAMPING_RX_SOFTWARE |
+					SOF_TIMESTAMPING_SOFTWARE;
+		info->phc_index = -1;
+
+		return 0;
+	}
+
+	info->so_timestamping = SOF_TIMESTAMPING_TX_SOFTWARE |
+				SOF_TIMESTAMPING_RX_SOFTWARE |
+				SOF_TIMESTAMPING_SOFTWARE |
+				SOF_TIMESTAMPING_TX_HARDWARE |
+				SOF_TIMESTAMPING_RX_HARDWARE |
+				SOF_TIMESTAMPING_RAW_HARDWARE;
+
+	if (ptp->clock)
+		info->phc_index = ptp_clock_index(ptp->clock);
+	else
+		info->phc_index = -1;
+
+	info->rx_filters = BIT(HWTSTAMP_FILTER_NONE) |
+			   BIT(HWTSTAMP_FILTER_PTP_V1_L4_EVENT) |
+			   BIT(HWTSTAMP_FILTER_PTP_V1_L4_SYNC) |
+			   BIT(HWTSTAMP_FILTER_PTP_V1_L4_DELAY_REQ) |
+			   BIT(HWTSTAMP_FILTER_PTP_V2_L4_EVENT) |
+			   BIT(HWTSTAMP_FILTER_PTP_V2_L4_SYNC) |
+			   BIT(HWTSTAMP_FILTER_PTP_V2_L4_DELAY_REQ) |
+			   BIT(HWTSTAMP_FILTER_PTP_V2_L2_EVENT) |
+			   BIT(HWTSTAMP_FILTER_PTP_V2_L2_SYNC) |
+			   BIT(HWTSTAMP_FILTER_PTP_V2_L2_DELAY_REQ) |
+			   BIT(HWTSTAMP_FILTER_PTP_V2_EVENT) |
+			   BIT(HWTSTAMP_FILTER_PTP_V2_SYNC) |
+			   BIT(HWTSTAMP_FILTER_PTP_V2_DELAY_REQ);
+
+	info->tx_types = BIT(HWTSTAMP_TX_OFF) | BIT(HWTSTAMP_TX_ON);
+
+	return 0;
+}
+#else
 int qede_ptp_get_ts_info(struct qede_dev *edev, struct ethtool_ts_info *info)
 {
 	struct qede_ptp *ptp = edev->ptp;
@@ -432,6 +554,7 @@ int qede_ptp_get_ts_info(struct qede_dev *edev, struct ethtool_ts_info *info)
 
 	return 0;
 }
+#endif
 
 void qede_ptp_disable(struct qede_dev *edev)
 {
@@ -535,7 +658,12 @@ int qede_ptp_enable(struct qede_dev *edev)
 	ptp->clock_info.n_ext_ts = 0;
 	ptp->clock_info.n_per_out = 0;
 	ptp->clock_info.pps = 0;
+	//ptp->clock_info.adjfreq = qede_ptp_adjfreq;
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 2, 1))
+	ptp->clock_info.adjfine = qede_ptp_adjfine;
+#else
 	ptp->clock_info.adjfreq = qede_ptp_adjfreq;
+#endif
 	ptp->clock_info.adjtime = qede_ptp_adjtime;
 #ifdef _HAS_PTPTIME64 /* QEDE_UPSTREAM */
 	ptp->clock_info.gettime64 = qede_ptp_gettime;

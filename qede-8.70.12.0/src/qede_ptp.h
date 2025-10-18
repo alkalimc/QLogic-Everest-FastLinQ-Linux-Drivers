@@ -51,7 +51,13 @@ void qede_ptp_tx_ts(struct qede_dev *, struct sk_buff *);
 int qede_ptp_hw_ts(struct qede_dev *, struct ifreq *);
 void qede_ptp_disable(struct qede_dev *);
 int qede_ptp_enable(struct qede_dev *);
+//int qede_ptp_get_ts_info(struct qede_dev *, struct ethtool_ts_info *);
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 11, 1))
+int qede_ptp_get_ts_info(struct qede_dev *, struct kernel_ethtool_ts_info *);
+#else
 int qede_ptp_get_ts_info(struct qede_dev *, struct ethtool_ts_info *);
+#endif
 
 static inline void qede_ptp_record_rx_ts(struct qede_dev *edev,
 					 union eth_rx_cqe *cqe,
@@ -98,11 +104,25 @@ static inline void qede_ptp_disable(struct qede_dev *dev)
 }
 
 struct ethtool_ts_info;
+//static inline int qede_ptp_get_ts_info(struct qede_dev *edev,
+//				       struct ethtool_ts_info *info)
+//{
+//	return 0;
+//}
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 11, 1))
+static inline int qede_ptp_get_ts_info(struct qede_dev *edev,
+				       struct kernel_ethtool_ts_info *info)
+{
+	return 0;
+}
+#else
 static inline int qede_ptp_get_ts_info(struct qede_dev *edev,
 				       struct ethtool_ts_info *info)
 {
 	return 0;
 }
+#endif
 
 static inline void qede_ptp_record_rx_ts(struct qede_dev *edev,
 					 union eth_rx_cqe *cqe,

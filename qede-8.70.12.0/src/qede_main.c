@@ -2243,7 +2243,13 @@ static int __qede_probe(struct pci_dev *pdev, u32 dp_module, u8 dp_level,
 	sp_params.drv_minor = QEDE_MINOR_VERSION;
 	sp_params.drv_rev = QEDE_REVISION_VERSION;
 	sp_params.drv_eng = QEDE_ENGINEERING_VERSION;
+	//strlcpy(sp_params.name, "qede LAN", QED_DRV_VER_STR_SIZE);
+	
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 1))
+	strscpy(sp_params.name, "qede LAN", QED_DRV_VER_STR_SIZE);
+#else
 	strlcpy(sp_params.name, "qede LAN", QED_DRV_VER_STR_SIZE);
+#endif
 	rc = qed_ops->common->slowpath_start(cdev, &sp_params);
 	if (rc) {
 		pr_notice("qed %02x:%02x.%x: Cannot start slowpath\n",
@@ -3232,8 +3238,15 @@ static void qede_napi_add_enable(struct qede_dev *edev)
 
 	/* Add NAPI objects */
 	for_each_queue(i) {
+		//netif_napi_add(edev->ndev, &edev->fp_array[i].napi,
+		//	       qede_poll, NAPI_POLL_WEIGHT);
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 1))
+		netif_napi_add_weight(edev->ndev, &edev->fp_array[i].napi,
+			       qede_poll, NAPI_POLL_WEIGHT);
+#else
 		netif_napi_add(edev->ndev, &edev->fp_array[i].napi,
 			       qede_poll, NAPI_POLL_WEIGHT);
+#endif
 		napi_enable(&edev->fp_array[i].napi);
 	}
 }
