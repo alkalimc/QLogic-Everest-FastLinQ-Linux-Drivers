@@ -2098,7 +2098,13 @@ static u32 qede_get_rxfh_key_size(struct net_device *dev)
 #if HAS_ETHTOOL(GET_RXFH) || HAS_ETHTOOL(GET_RXF_INDIR) /* QEDE_UPSTREAM */
 #if HAS_ETHTOOL(GET_RXFH) /* QEDE_UPSTREAM */
 #ifdef _HAS_RSS_HASH_FUNCS /* QEDE_UPSTREAM */
+//static int qede_get_rxfh(struct net_device *dev, u32 *indir, u8 *key, u8 *hfunc)
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 1))
+static int qede_get_rxfh(struct net_device *dev, struct ethtool_rxfh_param *rxfh)
+#else
 static int qede_get_rxfh(struct net_device *dev, u32 *indir, u8 *key, u8 *hfunc)
+#endif
 #else
 static int qede_get_rxfh(struct net_device *dev, u32 *indir, u8 *key)
 #endif
@@ -2113,27 +2119,58 @@ static int qede_get_rxfh_indir(struct net_device *dev,
 	int i;
 
 #ifdef _HAS_RSS_HASH_FUNCS /* QEDE_UPSTREAM */
+	//if (hfunc)
+	//	*hfunc = ETH_RSS_HASH_TOP;
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 1))
+	rxfh->hfunc = ETH_RSS_HASH_TOP;
+#else
 	if (hfunc)
 		*hfunc = ETH_RSS_HASH_TOP;
 #endif
+#endif
 
+	//if (!indir)
+	//	return 0;
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 1))
+	if (!rxfh->indir);
+		return 0;
+#else
 	if (!indir)
 		return 0;
+#endif
 
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(3, 3, 0)) && NOT_SLES_OR_PRE_VERSION(SLES11_SP3) && !(defined(_HAS_ETHTOOL_EXT_SET_RXF_INDIR)) /* ! QEDE_UPSTREAM */
 	indir->size = QED_RSS_IND_TABLE_SIZE;
 #endif
 	for (i = 0; i < QED_RSS_IND_TABLE_SIZE; i++)
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 3, 0)) || SLES_STARTING_AT_VERSION(SLES11_SP3) || (defined(_HAS_ETHTOOL_EXT_GET_RXF_INDIR)) /* QEDE_UPSTREAM */
+		//indir[i] = edev->rss_ind_table[i];
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 1))
+		rxfh->indir[i] = edev->rss_ind_table[i];
+#else
 		indir[i] = edev->rss_ind_table[i];
+#endif
 #else
 		indir->ring_index[i] = edev->rss_ind_table[i];
 #endif
 
 #if (defined(_HAS_ETHTOOL_GET_RXFH)) /* QEDE_UPSTREAM */
+	//if (key)
+	//	memcpy(key, edev->rss_key,
+	//	       qede_get_rxfh_key_size(dev));
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 1))
+	if (rxfh->key)
+		memcpy(rxfh->key, edev->rss_key,
+		       qede_get_rxfh_key_size(dev));
+#else
 	if (key)
 		memcpy(key, edev->rss_key,
 		       qede_get_rxfh_key_size(dev));
+#endif
 #endif
 
 	return 0;
@@ -2143,8 +2180,17 @@ static int qede_get_rxfh_indir(struct net_device *dev,
 #if HAS_ETHTOOL(SET_RXFH) || HAS_ETHTOOL(SET_RXF_INDIR) /* QEDE_UPSTREAM */
 #if HAS_ETHTOOL(SET_RXFH) /* QEDE_UPSTREAM */
 #ifdef _HAS_RSS_HASH_FUNCS /* QEDE_UPSTREAM */
+//static int qede_set_rxfh(struct net_device *dev, const u32 *indir,
+//			 const u8 *key, const u8 hfunc)
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 1))
+static int qede_set_rxfh(struct net_device *dev,
+			 struct ethtool_rxfh_param *rxfh,
+			 struct netlink_ext_ack *extack)
+#else
 static int qede_set_rxfh(struct net_device *dev, const u32 *indir,
 			 const u8 *key, const u8 hfunc)
+#endif
 #else
 static int qede_set_rxfh(struct net_device *dev, const u32 *indir,
 			 const u8 *key)
@@ -2170,18 +2216,38 @@ static int qede_set_rxfh_indir(struct net_device *dev,
 	}
 
 #ifdef _HAS_RSS_HASH_FUNCS /* QEDE_UPSTREAM */
+	//if (hfunc != ETH_RSS_HASH_NO_CHANGE && hfunc != ETH_RSS_HASH_TOP)
+	//	return -EOPNOTSUPP;
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 1))
+	if (rxfh->hfunc != ETH_RSS_HASH_NO_CHANGE && rxfh->hfunc != ETH_RSS_HASH_TOP)
+		return -EOPNOTSUPP;
+#else
 	if (hfunc != ETH_RSS_HASH_NO_CHANGE && hfunc != ETH_RSS_HASH_TOP)
 		return -EOPNOTSUPP;
 #endif
+#endif
 
 #if HAS_ETHTOOL(SET_RXFH) /* QEDE_UPSTREAM */
+	//if (!indir && !key)
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 1))
+	if (!rxfh->indir && !rxfh->key)
+#else
 	if (!indir && !key)
+#endif
 #else
 	if (!indir)
 #endif
 		return 0;
 
+	//if (indir) {
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 1))
+	if (rxfh->indir) {
+#else
 	if (indir) {
+#endif
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(3, 3, 0)) && NOT_SLES_OR_PRE_VERSION(SLES11_SP3) && !(defined(_HAS_ETHTOOL_EXT_SET_RXF_INDIR)) /* ! QEDE_UPSTREAM */
 		/* validate the size */
 		if (indir->size != QED_RSS_IND_TABLE_SIZE) {
@@ -2191,7 +2257,13 @@ static int qede_set_rxfh_indir(struct net_device *dev,
 #endif
 		for (i = 0; i < QED_RSS_IND_TABLE_SIZE; i++)
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 3, 0)) || SLES_STARTING_AT_VERSION(SLES11_SP3) || (defined(_HAS_ETHTOOL_EXT_SET_RXF_INDIR))  /* QEDE_UPSTREAM */
+			//edev->rss_ind_table[i] = indir[i];
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 1))
+			edev->rss_ind_table[i] = rxfh->indir[i];
+#else
 			edev->rss_ind_table[i] = indir[i];
+#endif
 #else
 			edev->rss_ind_table[i] = indir->ring_index[i];
 #endif
@@ -2199,11 +2271,25 @@ static int qede_set_rxfh_indir(struct net_device *dev,
 	}
 
 #if HAS_ETHTOOL(SET_RXFH) /* QEDE_UPSTREAM */
+	//if (key) {
+	//	memcpy(&edev->rss_key, key,
+	//	       qede_get_rxfh_key_size(dev));
+	//	edev->rss_params_inited |= QEDE_RSS_KEY_INITED;
+	//}
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 1))
+	if (rxfh->key) {
+		memcpy(&edev->rss_key, rxfh->key,
+		       qede_get_rxfh_key_size(dev));
+		edev->rss_params_inited |= QEDE_RSS_KEY_INITED;
+	}
+#else
 	if (key) {
 		memcpy(&edev->rss_key, key,
 		       qede_get_rxfh_key_size(dev));
 		edev->rss_params_inited |= QEDE_RSS_KEY_INITED;
 	}
+#endif
 #endif
 
 	__qede_lock(edev);
