@@ -621,7 +621,13 @@ static void  qedf_init_task(struct qedf_rport *fcport, struct fc_lport *lport,
 
 	/* Choose which CQ to return I/O on */
 #if defined(NR_HW_QUEUES) && !defined(USE_BLK_MQ)
+	//uniq_tag = blk_mq_unique_tag(sc_cmd->request);
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 16, 0))
+	uniq_tag = blk_mq_unique_tag(blk_mq_rq_from_pdu(sc_cmd));
+#else
 	uniq_tag = blk_mq_unique_tag(sc_cmd->request);
+#endif
 	hwq = blk_mq_unique_tag_to_hwq(uniq_tag);
 	/* If blk-mq is enabled, use the hardware queue id */
 	cq_idx = hwq;
