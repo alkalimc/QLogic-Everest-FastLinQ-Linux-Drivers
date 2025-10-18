@@ -1375,6 +1375,7 @@ static struct scsi_host_template qedf_host_template = {
 	.max_sectors 	= 0xffff,
 	.queuecommand 	= qedf_queuecommand,
 	//.shost_attrs	= qedf_host_attrs,
+	
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 16, 1))
 	.shost_groups	= qedf_host_groups,
 #else

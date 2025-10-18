@@ -574,7 +574,13 @@ extern void qedf_process_abts_compl(struct qedf_ctx *qedf, struct fcoe_cqe *cqe,
 extern struct qedf_ioreq *qedf_alloc_cmd(struct qedf_rport *fcport,
 	u8 cmd_type);
 
+//extern struct device_attribute *qedf_host_attrs[];
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 16, 1))
+extern const struct attribute_group *qedf_host_groups[];
+#else
 extern struct device_attribute *qedf_host_attrs[];
+#endif
 extern void qedf_cmd_timer_set(struct qedf_ctx *qedf,
 	struct qedf_ioreq *io_req, unsigned int timer_msecs);
 extern int qedf_init_mp_req(struct qedf_ioreq *io_req);
