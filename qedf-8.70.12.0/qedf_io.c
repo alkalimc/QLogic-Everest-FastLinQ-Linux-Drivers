@@ -1090,7 +1090,13 @@ qedf_queuecommand(struct scsi_cmnd *sc_cmd, void (*done)(struct scsi_cmnd *))
 		QEDF_ERR(&qedf->dbg_ctx, "Number of SG elements %d exceeds what hardware limitation of %d.\n",
 		    num_sgs, QEDF_MAX_BDS_PER_CMD);
 		sc_cmd->result = DID_ERROR;
+		//sc_cmd->scsi_done(sc_cmd);
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 16, 1))
+		scsi_done(sc_cmd);
+#else
 		sc_cmd->scsi_done(sc_cmd);
+#endif
 		return 0;
 	}
 
