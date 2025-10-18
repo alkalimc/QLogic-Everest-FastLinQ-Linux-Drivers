@@ -543,7 +543,13 @@ qedr_addr4_resolve(struct qedr_dev *dev,
 		 &src_ip, &dst_ip);
 
 #ifdef DEFINE_IP_ROUTE_OUTPUT /* QEDR_UPSTREAM */
+	//rt = ip_route_output(&init_net, dst_ip, src_ip, 0, 0);
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 10, 1))
+	rt = ip_route_output(&init_net, dst_ip, src_ip, 0, 0, RT_SCOPE_UNIVERSE);
+#else
 	rt = ip_route_output(&init_net, dst_ip, src_ip, 0, 0);
+#endif
 	if (IS_ERR(rt)) {
 		DP_ERR(dev, "ip_route_output returned error\n");
 		return -EINVAL;
