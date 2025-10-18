@@ -1079,7 +1079,13 @@ static void qede_get_drvinfo(struct net_device *ndev,
 			 "mfw %s", mfw);
 	}
 
+	//strlcpy(info->bus_info, pci_name(edev->pdev), sizeof(info->bus_info));
+	
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 1))
+	strscpy(info->bus_info, pci_name(edev->pdev), sizeof(info->bus_info));
+#else
 	strlcpy(info->bus_info, pci_name(edev->pdev), sizeof(info->bus_info));
+#endif
 }
 
 static void qede_get_wol(struct net_device *ndev, struct ethtool_wolinfo *wol)
