@@ -1677,11 +1677,25 @@ void qedf_scsi_done(struct qedf_ctx *qedf, struct qedf_ioreq *io_req,
 		goto bad_scsi_ptr;
 	}
 
+	//if (!sc_cmd->scsi_done) {
+	//	QEDF_ERR(&qedf->dbg_ctx, "sc_cmd->scsi_done for sc_cmd %px is NULL.\n",
+	//	    sc_cmd);
+	//	goto bad_scsi_ptr;
+	//}
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 18, 1))
+	if (!scsi_done) {
+		QEDF_ERR(&qedf->dbg_ctx, "sc_cmd->scsi_done for sc_cmd %px is NULL.\n",
+		    sc_cmd);
+		goto bad_scsi_ptr;
+	}
+#else
 	if (!sc_cmd->scsi_done) {
 		QEDF_ERR(&qedf->dbg_ctx, "sc_cmd->scsi_done for sc_cmd %px is NULL.\n",
 		    sc_cmd);
 		goto bad_scsi_ptr;
 	}
+#endif
 
 	qedf_unmap_sg_list(qedf, io_req);
 
