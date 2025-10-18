@@ -1636,6 +1636,9 @@ struct ib_cq *qedr_create_cq(struct ib_device *ibdev, int entries, int vector,
 #endif
 #endif
 {
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 11, 1))
+	struct ib_udata *udata = &attrs->driver_udata;
+#endif
 #ifdef _HAS_CQ_ALLOCATION
 	struct ib_device *ibdev = ibcq->device;
 #endif
