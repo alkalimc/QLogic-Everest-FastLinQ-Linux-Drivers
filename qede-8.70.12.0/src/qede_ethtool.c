@@ -2721,6 +2721,109 @@ static int qede_get_eee(struct net_device *dev, struct ethtool_eee *edata)
 	return 0;
 }
 
+//static int qede_set_eee(struct net_device *dev, struct ethtool_eee *edata)
+//{
+//	struct qede_dev *edev = netdev_priv(dev);
+//	struct qed_link_output current_link;
+//	struct qed_link_params params;
+//
+//	if (!edev->cdev || edev->aer_recov_prog)
+//		return -EINVAL;
+//
+//	if (!edev->ops || !edev->ops->common->can_link_change(edev->cdev)) {
+//		DP_INFO(edev,
+//			"Link settings are not allowed to be changed\n");
+//		return -EOPNOTSUPP;
+//	}
+//
+//	memset(&current_link, 0, sizeof(current_link));
+//	edev->ops->common->get_link(edev->cdev, &current_link);
+//
+//	if (!current_link.eee_supported) {
+//		DP_INFO(edev, "EEE is not supported\n");
+//		return -EOPNOTSUPP;
+//	}
+//
+//	memset(&params, 0, sizeof(params));
+//	params.override_flags |= QED_LINK_OVERRIDE_EEE_CONFIG;
+//
+//	if (!(edata->advertised & (ADVERTISED_1000baseT_Full |
+//				  ADVERTISED_10000baseT_Full)) ||
+//	    ((edata->advertised & (ADVERTISED_1000baseT_Full |
+//				  ADVERTISED_10000baseT_Full)) !=
+//	     edata->advertised)) {
+//		DP_VERBOSE(edev, QED_MSG_DEBUG,
+//			   "Invalid advertised capabilities %d\n",
+//			   edata->advertised);
+//		return -EINVAL;
+//	}
+//
+//	if (edata->advertised & ADVERTISED_1000baseT_Full)
+//		params.eee.adv_caps = QED_EEE_1G_ADV;
+//	if (edata->advertised & ADVERTISED_10000baseT_Full)
+//		params.eee.adv_caps |= QED_EEE_10G_ADV;
+//	params.eee.enable = edata->eee_enabled;
+//	params.eee.tx_lpi_enable = edata->tx_lpi_enabled;
+//	params.eee.tx_lpi_timer = edata->tx_lpi_timer;
+//
+//	params.link_up = true;
+//	edev->ops->common->set_link(edev->cdev, &params);
+//
+//	return 0;
+//}
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 9, 1))
+static int qede_set_eee(struct net_device *dev, struct ethtool_keee *edata)
+{
+	struct qede_dev *edev = netdev_priv(dev);
+	struct qed_link_output current_link;
+	struct qed_link_params params;
+
+	if (!edev->cdev || edev->aer_recov_prog)
+		return -EINVAL;
+
+	if (!edev->ops || !edev->ops->common->can_link_change(edev->cdev)) {
+		DP_INFO(edev,
+			"Link settings are not allowed to be changed\n");
+		return -EOPNOTSUPP;
+	}
+
+	memset(&current_link, 0, sizeof(current_link));
+	edev->ops->common->get_link(edev->cdev, &current_link);
+
+	if (!current_link.eee_supported) {
+		DP_INFO(edev, "EEE is not supported\n");
+		return -EOPNOTSUPP;
+	}
+
+	memset(&params, 0, sizeof(params));
+	params.override_flags |= QED_LINK_OVERRIDE_EEE_CONFIG;
+
+	if (!(edata->advertised & (ADVERTISED_1000baseT_Full |
+				  ADVERTISED_10000baseT_Full)) ||
+	    ((edata->advertised & (ADVERTISED_1000baseT_Full |
+				  ADVERTISED_10000baseT_Full)) !=
+	     edata->advertised)) {
+		DP_VERBOSE(edev, QED_MSG_DEBUG,
+			   "Invalid advertised capabilities %d\n",
+			   edata->advertised);
+		return -EINVAL;
+	}
+
+	if (edata->advertised & ADVERTISED_1000baseT_Full)
+		params.eee.adv_caps = QED_EEE_1G_ADV;
+	if (edata->advertised & ADVERTISED_10000baseT_Full)
+		params.eee.adv_caps |= QED_EEE_10G_ADV;
+	params.eee.enable = edata->eee_enabled;
+	params.eee.tx_lpi_enable = edata->tx_lpi_enabled;
+	params.eee.tx_lpi_timer = edata->tx_lpi_timer;
+
+	params.link_up = true;
+	edev->ops->common->set_link(edev->cdev, &params);
+
+	return 0;
+}
+#else
 static int qede_set_eee(struct net_device *dev, struct ethtool_eee *edata)
 {
 	struct qede_dev *edev = netdev_priv(dev);
@@ -2771,6 +2874,7 @@ static int qede_set_eee(struct net_device *dev, struct ethtool_eee *edata)
 
 	return 0;
 }
+#endif
 #endif
 
 #if HAS_ETHTOOL(GET_FEC) /* QEDE_UPSTREAM */
