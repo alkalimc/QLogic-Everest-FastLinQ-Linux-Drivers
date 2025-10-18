@@ -2684,6 +2684,81 @@ static int qede_get_tunable(struct net_device *dev,
 #endif
 
 #if HAS_ETHTOOL(GET_EEE) /* QEDE_UPSTREAM */
+//static int qede_get_eee(struct net_device *dev, struct ethtool_eee *edata)
+//{
+//	struct qede_dev *edev = netdev_priv(dev);
+//	struct qed_link_output current_link;
+//
+//	if (!edev->cdev || edev->aer_recov_prog)
+//		return -EINVAL;
+//
+//	memset(&current_link, 0, sizeof(current_link));
+//	edev->ops->common->get_link(edev->cdev, &current_link);
+//
+//	if (!current_link.eee_supported) {
+//		DP_INFO(edev, "EEE is not supported\n");
+//		return -EOPNOTSUPP;
+//	}
+//
+//	if (current_link.eee.adv_caps & QED_EEE_1G_ADV)
+//		edata->advertised = ADVERTISED_1000baseT_Full;
+//	if (current_link.eee.adv_caps & QED_EEE_10G_ADV)
+//		edata->advertised |= ADVERTISED_10000baseT_Full;
+//	if (current_link.sup_caps & QED_EEE_1G_ADV)
+//		edata->supported = ADVERTISED_1000baseT_Full;
+//	if (current_link.sup_caps & QED_EEE_10G_ADV)
+//		edata->supported |= ADVERTISED_10000baseT_Full;
+//	if (current_link.eee.lp_adv_caps & QED_EEE_1G_ADV)
+//		edata->lp_advertised = ADVERTISED_1000baseT_Full;
+//	if (current_link.eee.lp_adv_caps & QED_EEE_10G_ADV)
+//		edata->lp_advertised |= ADVERTISED_10000baseT_Full;
+//
+//	edata->tx_lpi_timer = current_link.eee.tx_lpi_timer;
+//	edata->eee_enabled = current_link.eee.enable;
+//	edata->tx_lpi_enabled = current_link.eee.tx_lpi_enable;
+//	edata->eee_active = current_link.eee_active;
+//
+//	return 0;
+//}
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 9, 1))
+static int qede_get_eee(struct net_device *dev, struct ethtool_keee *edata)
+{
+	struct qede_dev *edev = netdev_priv(dev);
+	struct qed_link_output current_link;
+
+	if (!edev->cdev || edev->aer_recov_prog)
+		return -EINVAL;
+
+	memset(&current_link, 0, sizeof(current_link));
+	edev->ops->common->get_link(edev->cdev, &current_link);
+
+	if (!current_link.eee_supported) {
+		DP_INFO(edev, "EEE is not supported\n");
+		return -EOPNOTSUPP;
+	}
+
+	if (current_link.eee.adv_caps & QED_EEE_1G_ADV)
+		edata->advertised = ADVERTISED_1000baseT_Full;
+	if (current_link.eee.adv_caps & QED_EEE_10G_ADV)
+		edata->advertised |= ADVERTISED_10000baseT_Full;
+	if (current_link.sup_caps & QED_EEE_1G_ADV)
+		edata->supported = ADVERTISED_1000baseT_Full;
+	if (current_link.sup_caps & QED_EEE_10G_ADV)
+		edata->supported |= ADVERTISED_10000baseT_Full;
+	if (current_link.eee.lp_adv_caps & QED_EEE_1G_ADV)
+		edata->lp_advertised = ADVERTISED_1000baseT_Full;
+	if (current_link.eee.lp_adv_caps & QED_EEE_10G_ADV)
+		edata->lp_advertised |= ADVERTISED_10000baseT_Full;
+
+	edata->tx_lpi_timer = current_link.eee.tx_lpi_timer;
+	edata->eee_enabled = current_link.eee.enable;
+	edata->tx_lpi_enabled = current_link.eee.tx_lpi_enable;
+	edata->eee_active = current_link.eee_active;
+
+	return 0;
+}
+#else
 static int qede_get_eee(struct net_device *dev, struct ethtool_eee *edata)
 {
 	struct qede_dev *edev = netdev_priv(dev);
@@ -2720,6 +2795,7 @@ static int qede_get_eee(struct net_device *dev, struct ethtool_eee *edata)
 
 	return 0;
 }
+#endif
 
 //static int qede_set_eee(struct net_device *dev, struct ethtool_eee *edata)
 //{
