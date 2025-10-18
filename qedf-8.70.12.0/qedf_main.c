@@ -1065,7 +1065,14 @@ static int qedf_eh_abort(struct scsi_cmnd *sc_cmd)
 	}
 
 
+	//io_req = (struct qedf_ioreq *)sc_cmd->SCp.ptr;
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 18, 1))
+	io_req = (struct qedf_ioreq *)((struct scsi_pointer *)scsi_cmd_priv(sc_cmd))->ptr;
+#else
 	io_req = (struct qedf_ioreq *)sc_cmd->SCp.ptr;
+#endif
+
 	if (!io_req) {
 		QEDF_ERR(&(qedf->dbg_ctx), "sc_cmd not queued with lld, sc_cmd=%px,"
 			" op=0x%02x, port_id=%06x\n", sc_cmd, sc_cmd->cmnd[0],
@@ -1367,7 +1374,13 @@ static struct scsi_host_template qedf_host_template = {
 #endif
 	.max_sectors 	= 0xffff,
 	.queuecommand 	= qedf_queuecommand,
+	//.shost_attrs	= qedf_host_attrs,
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 16, 1))
+	.shost_groups	= qedf_host_groups,
+#else
 	.shost_attrs	= qedf_host_attrs,
+#endif
 	.eh_abort_handler	= qedf_eh_abort,
 	.eh_device_reset_handler = qedf_eh_device_reset, /* lun reset */
 	.eh_target_reset_handler = qedf_eh_target_reset, /* target reset */
@@ -3791,14 +3804,36 @@ static int qedf_set_fcoe_pf_param(struct qedf_ctx *qedf)
 	QEDF_INFO(&(qedf->dbg_ctx), QEDF_LOG_DISC, "Number of queues: %d.\n",
 	    qedf->num_queues);
 
+	//qedf->p_cpuq = pci_alloc_consistent(qedf->pdev,
+	//    qedf->num_queues * sizeof(struct qedf_glbl_q_params),
+	//    &qedf->hw_p_cpuq);
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 20, 1))
+	qedf->p_cpuq = dma_alloc_coherent(&qedf->pdev->dev,
+	    qedf->num_queues * sizeof(struct qedf_glbl_q_params),
+	    &qedf->hw_p_cpuq, GFP_KERNEL);
+#else
 	qedf->p_cpuq = pci_alloc_consistent(qedf->pdev,
 	    qedf->num_queues * sizeof(struct qedf_glbl_q_params),
 	    &qedf->hw_p_cpuq);
+#endif
 
+	//if (!qedf->p_cpuq) {
+	//	QEDF_ERR(&(qedf->dbg_ctx), "pci_alloc_consistent failed.\n");
+	//	return 1;
+	//}
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 20, 1))
+	if (!qedf->p_cpuq) {
+		QEDF_ERR(&(qedf->dbg_ctx), "dma_alloc_coherent failed.\n");
+		return 1;
+	}
+#else
 	if (!qedf->p_cpuq) {
 		QEDF_ERR(&(qedf->dbg_ctx), "pci_alloc_consistent failed.\n");
 		return 1;
 	}
+#endif
 
 	rval = qedf_alloc_global_queues(qedf);
 	if (rval) {
@@ -3864,11 +3899,25 @@ static void qedf_free_fcoe_pf_param(struct qedf_ctx *qedf)
 {
 	size_t size = 0;
 
+	//if (qedf->p_cpuq) {
+	//	size = qedf->num_queues * sizeof(struct qedf_glbl_q_params);
+	//	pci_free_consistent(qedf->pdev, size, qedf->p_cpuq,
+	//	    qedf->hw_p_cpuq);
+	//}
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 20, 1))
+	if (qedf->p_cpuq) {
+		size = qedf->num_queues * sizeof(struct qedf_glbl_q_params);
+		dma_free_coherent(&qedf->pdev->dev, size, qedf->p_cpuq,
+		    qedf->hw_p_cpuq);
+	}
+#else
 	if (qedf->p_cpuq) {
 		size = qedf->num_queues * sizeof(struct qedf_glbl_q_params);
 		pci_free_consistent(qedf->pdev, size, qedf->p_cpuq,
 		    qedf->hw_p_cpuq);
 	}
+#endif
 
 	qedf_free_global_queues(qedf);
 

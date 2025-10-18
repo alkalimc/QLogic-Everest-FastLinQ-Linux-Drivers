@@ -1994,20 +1994,65 @@ static void qedi_scsi_completion(struct qedi_ctx *qedi,
 		goto error;
 	}
 
+	//if (!sc_cmd->SCp.ptr) {
+	//	QEDI_WARN(&qedi->dbg_ctx,
+	//		  "SCp.ptr is NULL, returned in another context.\n");
+	//	goto error;
+	//}
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 18, 1))
+	if (!((struct scsi_pointer *)scsi_cmd_priv(sc_cmd))->ptr) {
+		QEDI_WARN(&qedi->dbg_ctx,
+			  "((struct scsi_pointer *)scsi_cmd_priv(sc_cmd))->ptr is NULL, returned in another context.\n");
+		goto error;
+	}
+#else
 	if (!sc_cmd->SCp.ptr) {
 		QEDI_WARN(&qedi->dbg_ctx,
 			  "SCp.ptr is NULL, returned in another context.\n");
 		goto error;
 	}
+#endif
 
+	//if (!sc_cmd->request) {
+	//	QEDI_WARN(&qedi->dbg_ctx,
+	//		  "sc_cmd->request is NULL, sc_cmd=%p.\n",
+	//		  sc_cmd);
+	//	goto error;
+	//}
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 15, 1))
+	if (!scsi_cmd_to_rq(sc_cmd)) {
+		QEDI_WARN(&qedi->dbg_ctx,
+			  "scsi_cmd_to_rq(sc_cmd) is NULL, sc_cmd=%p.\n",
+			  sc_cmd);
+		goto error;
+	}
+#else
 	if (!sc_cmd->request) {
 		QEDI_WARN(&qedi->dbg_ctx,
 			  "sc_cmd->request is NULL, sc_cmd=%p.\n",
 			  sc_cmd);
 		goto error;
 	}
+#endif
 
 #if defined BLK_DEV_SPECIAL
+	//if (!sc_cmd->request->special) {
+	//	QEDI_WARN(&qedi->dbg_ctx,
+	//		  "request->special is NULL so request not valid, sc_cmd=%p.\n",
+	//		  sc_cmd);
+	//	goto error;
+	//}
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 15, 1))
+	if (!scsi_cmd_to_rq(sc_cmd)->special) {
+		QEDI_WARN(&qedi->dbg_ctx,
+			  "scsi_cmd_to_rq(sc_cmd)->special is NULL so request not valid, sc_cmd=%p.\n",
+			  sc_cmd);
+		goto error;
+	}
+#else
 	if (!sc_cmd->request->special) {
 		QEDI_WARN(&qedi->dbg_ctx,
 			  "request->special is NULL so request not valid, sc_cmd=%p.\n",
@@ -2015,13 +2060,30 @@ static void qedi_scsi_completion(struct qedi_ctx *qedi,
 		goto error;
 	}
 #endif
+#endif
 
+	//if (!sc_cmd->request->q) {
+	//	QEDI_WARN(&qedi->dbg_ctx,
+	//		  "request->q is NULL so request is not valid, sc_cmd=%p.\n",
+	//		  sc_cmd);
+	//	goto error;
+	//}
+	
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 15, 1))
+	if (!scsi_cmd_to_rq(sc_cmd)->q) {
+		QEDI_WARN(&qedi->dbg_ctx,
+			  "scsi_cmd_to_rq(sc_cmd)->q is NULL so request is not valid, sc_cmd=%p.\n",
+			  sc_cmd);
+		goto error;
+	}
+#else
 	if (!sc_cmd->request->q) {
 		QEDI_WARN(&qedi->dbg_ctx,
 			  "request->q is NULL so request is not valid, sc_cmd=%p.\n",
 			  sc_cmd);
 		goto error;
 	}
+#endif
 
 #if defined STRUCT_SCSI_RSP
 	hdr = (struct iscsi_scsi_rsp *)task->hdr;
