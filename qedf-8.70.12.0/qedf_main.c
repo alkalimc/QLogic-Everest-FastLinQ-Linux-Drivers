@@ -3899,11 +3899,25 @@ static void qedf_free_fcoe_pf_param(struct qedf_ctx *qedf)
 {
 	size_t size = 0;
 
+	//if (qedf->p_cpuq) {
+	//	size = qedf->num_queues * sizeof(struct qedf_glbl_q_params);
+	//	pci_free_consistent(qedf->pdev, size, qedf->p_cpuq,
+	//	    qedf->hw_p_cpuq);
+	//}
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 20, 1))
+	if (qedf->p_cpuq) {
+		size = qedf->num_queues * sizeof(struct qedf_glbl_q_params);
+		dma_free_coherent(&qedf->pdev->dev, size, qedf->p_cpuq,
+		    qedf->hw_p_cpuq);
+	}
+#else
 	if (qedf->p_cpuq) {
 		size = qedf->num_queues * sizeof(struct qedf_glbl_q_params);
 		pci_free_consistent(qedf->pdev, size, qedf->p_cpuq,
 		    qedf->hw_p_cpuq);
 	}
+#endif
 
 	qedf_free_global_queues(qedf);
 
