@@ -19,9 +19,6 @@
 #include <linux/cpu.h>
 #include <linux/iscsi_boot_sysfs.h>
 #include <linux/aer.h>
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 1))
-#include <linux/prandom.h>
-#endif
 
 #include <scsi/scsi_cmnd.h>
 #include <scsi/scsi_device.h>
@@ -32,6 +29,10 @@
 #include "qedi.h"
 #include "qedi_gbl.h"
 #include "qedi_iscsi.h"
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 1))
+#include <linux/prandom.h>
+#endif
 
 static uint qedi_qed_debug;
 module_param(qedi_qed_debug, uint, S_IRUGO | S_IWUSR);
