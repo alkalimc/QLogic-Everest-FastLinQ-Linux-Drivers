@@ -147,9 +147,28 @@ static DEVICE_ATTR_RO(port_state);
 static DEVICE_ATTR_RO(speed);
 
 
+//struct device_attribute *qedi_shost_attrs[] = {
+//	&dev_attr_port_state,
+//	&dev_attr_speed,
+//	NULL
+//};
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 16, 1))
+const struct attribute_group *qedi_shost_groups[] = {
+    &(struct attribute_group){
+        .attrs = (struct attribute *[]){
+            &dev_attr_port_state.attr,
+            &dev_attr_speed.attr,
+            NULL
+        }
+    },
+    NULL
+};
+#else
 struct device_attribute *qedi_shost_attrs[] = {
 	&dev_attr_port_state,
 	&dev_attr_speed,
 	NULL
 };
+#endif
 
