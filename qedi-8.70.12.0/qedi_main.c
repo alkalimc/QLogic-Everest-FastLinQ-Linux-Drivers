@@ -970,8 +970,16 @@ static void qedi_free_iscsi_pf_param(struct qedi_ctx *qedi)
 
 	if (qedi->p_cpuq) {
 		size = qedi->num_queues * sizeof(struct qedi_glbl_q_params);
+		//pci_free_consistent(qedi->pdev, size, qedi->p_cpuq,
+		//		    qedi->hw_p_cpuq);
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 20, 1))
+		dma_free_coherent(&qedi->pdev->dev, size, qedi->p_cpuq,
+				    qedi->hw_p_cpuq);
+#else
 		pci_free_consistent(qedi->pdev, size, qedi->p_cpuq,
 				    qedi->hw_p_cpuq);
+#endif
 	}
 
 	qedi_free_global_queues(qedi);
