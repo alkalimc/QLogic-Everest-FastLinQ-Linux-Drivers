@@ -19,6 +19,9 @@
 #include <linux/cpu.h>
 #include <linux/iscsi_boot_sysfs.h>
 #include <linux/aer.h>
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 1))
+#include <linux/prandom.h>
+#endif
 
 #include <scsi/scsi_cmnd.h>
 #include <scsi/scsi_device.h>
@@ -635,7 +638,13 @@ static int qedi_cm_alloc_mem(struct qedi_ctx *qedi)
 #if defined PRANDOM_API || PRANDOM_U32
 	port_id = prandom_u32() % QEDI_LOCAL_PORT_RANGE;
 #else
+	//port_id = random32() % QEDI_LOCAL_PORT_RANGE;
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 8, 1))
+	port_id = get_random_u32() % QEDI_LOCAL_PORT_RANGE;
+#else
 	port_id = random32() % QEDI_LOCAL_PORT_RANGE;
+#endif
 #endif
 	if (qedi_init_id_tbl(&qedi->lcl_port_tbl, QEDI_LOCAL_PORT_RANGE,
 			     QEDI_LOCAL_PORT_MIN, port_id)) {
