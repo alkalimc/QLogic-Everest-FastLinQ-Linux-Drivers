@@ -3807,28 +3807,26 @@ static int qedf_set_fcoe_pf_param(struct qedf_ctx *qedf)
 	//qedf->p_cpuq = pci_alloc_consistent(qedf->pdev,
 	//    qedf->num_queues * sizeof(struct qedf_glbl_q_params),
 	//    &qedf->hw_p_cpuq);
-
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 20, 1))
-	qedf->p_cpuq = dma_alloc_coherent(&qedf->pdev->dev,
-	    qedf->num_queues * sizeof(struct qedf_glbl_q_params),
-	    &qedf->hw_p_cpuq, GFP_KERNEL);
-#else
-	qedf->p_cpuq = pci_alloc_consistent(qedf->pdev,
-	    qedf->num_queues * sizeof(struct qedf_glbl_q_params),
-	    &qedf->hw_p_cpuq);
-#endif
-
+	
 	//if (!qedf->p_cpuq) {
 	//	QEDF_ERR(&(qedf->dbg_ctx), "pci_alloc_consistent failed.\n");
 	//	return 1;
 	//}
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 20, 1))
+	qedf->p_cpuq = dma_alloc_coherent(&qedf->pdev->dev,
+	    qedf->num_queues * sizeof(struct qedf_glbl_q_params),
+	    &qedf->hw_p_cpuq, GFP_KERNEL);
+
 	if (!qedf->p_cpuq) {
 		QEDF_ERR(&(qedf->dbg_ctx), "dma_alloc_coherent failed.\n");
 		return 1;
 	}
 #else
+	qedf->p_cpuq = pci_alloc_consistent(qedf->pdev,
+	    qedf->num_queues * sizeof(struct qedf_glbl_q_params),
+	    &qedf->hw_p_cpuq);
+		
 	if (!qedf->p_cpuq) {
 		QEDF_ERR(&(qedf->dbg_ctx), "pci_alloc_consistent failed.\n");
 		return 1;

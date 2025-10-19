@@ -479,7 +479,13 @@ static inline void *qedi_get_task_mem(struct qed_iscsi_tid *info, u32 tid)
 #endif
 #endif
 
+//extern struct device_attribute *qedi_shost_attrs[];
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 16, 1))
+extern const struct attribute_group *qedi_shost_groups[];
+#else
 extern struct device_attribute *qedi_shost_attrs[];
+#endif
 
 /* Map kthread_create_on_node simply to kthread_create if needed */
 #ifndef KTHREAD_CREATE_ON_NODE

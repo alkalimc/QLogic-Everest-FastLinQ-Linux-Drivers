@@ -67,7 +67,13 @@ struct scsi_host_template qedi_host_template = {
 #if defined ENABLE_CLUSTER
 	.use_clustering = ENABLE_CLUSTERING,
 #endif
+	//.shost_attrs = qedi_shost_attrs,
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 16, 1))
+	.shost_groups = qedi_shost_groups,
+#else
 	.shost_attrs = qedi_shost_attrs,
+#endif
 };
 
 static void qedi_conn_free_login_resources(struct qedi_ctx *qedi,

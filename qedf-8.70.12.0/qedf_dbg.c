@@ -140,6 +140,7 @@ qedf_uevent_emit(struct Scsi_Host *shost, u32 code, char *msg)
 	case QEDF_UEVENT_CODE_GRCDUMP:
 		//if (msg)
 		//	strlcpy(event_string, msg, strlen(msg));
+		
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 1))
 		if (msg)
 			strscpy(event_string, msg, strlen(msg));

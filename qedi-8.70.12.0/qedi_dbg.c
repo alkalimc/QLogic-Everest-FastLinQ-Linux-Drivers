@@ -143,7 +143,13 @@ qedi_uevent_emit(struct Scsi_Host *shost, u32 code, char *msg)
 	switch (code) {
 	case QEDI_UEVENT_CODE_GRCDUMP:
 		if (msg)
+			//strlcpy(event_string, msg, strlen(msg));
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 1))
+			strscpy(event_string, msg, strlen(msg));
+#else
 			strlcpy(event_string, msg, strlen(msg));
+#endif
 		else
 			sprintf(event_string, "GRCDUMP=%u", shost->host_no);
 		break;

@@ -2753,20 +2753,6 @@ static int qede_get_eee(struct net_device *dev, struct ethtool_keee *edata)
 		return -EOPNOTSUPP;
 	}
 
-	//if (current_link.eee.adv_caps & QED_EEE_1G_ADV)
-	//	edata->advertised = ADVERTISED_1000baseT_Full;
-	//if (current_link.eee.adv_caps & QED_EEE_10G_ADV)
-	//	edata->advertised |= ADVERTISED_10000baseT_Full;
-	//if (current_link.sup_caps & QED_EEE_1G_ADV)
-	//	edata->supported = ADVERTISED_1000baseT_Full;
-	//if (current_link.sup_caps & QED_EEE_10G_ADV)
-	//	edata->supported |= ADVERTISED_10000baseT_Full;
-	//if (current_link.eee.lp_adv_caps & QED_EEE_1G_ADV)
-	//	edata->lp_advertised = ADVERTISED_1000baseT_Full;
-	//if (current_link.eee.lp_adv_caps & QED_EEE_10G_ADV)
-	//	edata->lp_advertised |= ADVERTISED_10000baseT_Full;
-
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 9, 1))
 	linkmode_mod_bit(ETHTOOL_LINK_MODE_1000baseT_Full_BIT,
 			 edata->advertised,
 			 current_link.eee.adv_caps & QED_EEE_1G_ADV);
@@ -2785,20 +2771,6 @@ static int qede_get_eee(struct net_device *dev, struct ethtool_keee *edata)
 	linkmode_mod_bit(ETHTOOL_LINK_MODE_10000baseT_Full_BIT,
 			 edata->lp_advertised,
 			 current_link.eee.lp_adv_caps & QED_EEE_10G_ADV);
-#else
-	if (current_link.eee.adv_caps & QED_EEE_1G_ADV)
-		edata->advertised = ADVERTISED_1000baseT_Full;
-	if (current_link.eee.adv_caps & QED_EEE_10G_ADV)
-		edata->advertised |= ADVERTISED_10000baseT_Full;
-	if (current_link.sup_caps & QED_EEE_1G_ADV)
-		edata->supported = ADVERTISED_1000baseT_Full;
-	if (current_link.sup_caps & QED_EEE_10G_ADV)
-		edata->supported |= ADVERTISED_10000baseT_Full;
-	if (current_link.eee.lp_adv_caps & QED_EEE_1G_ADV)
-		edata->lp_advertised = ADVERTISED_1000baseT_Full;
-	if (current_link.eee.lp_adv_caps & QED_EEE_10G_ADV)
-		edata->lp_advertised |= ADVERTISED_10000baseT_Full;
-#endif
 
 	edata->tx_lpi_timer = current_link.eee.tx_lpi_timer;
 	edata->eee_enabled = current_link.eee.enable;
@@ -2900,16 +2872,12 @@ static int qede_get_eee(struct net_device *dev, struct ethtool_eee *edata)
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 9, 1))
 static int qede_set_eee(struct net_device *dev, struct ethtool_keee *edata)
 {
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 9, 1))
 	__ETHTOOL_DECLARE_LINK_MODE_MASK(supported) = {};
 	__ETHTOOL_DECLARE_LINK_MODE_MASK(tmp) = {};
-#endif
 	struct qede_dev *edev = netdev_priv(dev);
 	struct qed_link_output current_link;
 	struct qed_link_params params;
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 9, 1))
 	bool unsupp;
-#endif
 
 	if (!edev->cdev || edev->aer_recov_prog)
 		return -EINVAL;
@@ -2931,18 +2899,6 @@ static int qede_set_eee(struct net_device *dev, struct ethtool_keee *edata)
 	memset(&params, 0, sizeof(params));
 	params.override_flags |= QED_LINK_OVERRIDE_EEE_CONFIG;
 
-	//if (!(edata->advertised & (ADVERTISED_1000baseT_Full |
-	//			  ADVERTISED_10000baseT_Full)) ||
-	//    ((edata->advertised & (ADVERTISED_1000baseT_Full |
-	//			  ADVERTISED_10000baseT_Full)) !=
-	//     edata->advertised)) {
-	//	DP_VERBOSE(edev, QED_MSG_DEBUG,
-	//		   "Invalid advertised capabilities %d\n",
-	//		   edata->advertised);
-	//	return -EINVAL;
-	//}
-
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 9, 1))
 	linkmode_set_bit(ETHTOOL_LINK_MODE_10000baseT_Full_BIT,
 			 supported);
 	linkmode_set_bit(ETHTOOL_LINK_MODE_1000baseT_Full_BIT,
@@ -2955,35 +2911,11 @@ static int qede_set_eee(struct net_device *dev, struct ethtool_keee *edata)
 			   __ETHTOOL_LINK_MODE_MASK_NBITS, edata->advertised);
 		return -EINVAL;
 	}
-#else
-	if (!(edata->advertised & (ADVERTISED_1000baseT_Full |
-				  ADVERTISED_10000baseT_Full)) ||
-	    ((edata->advertised & (ADVERTISED_1000baseT_Full |
-				  ADVERTISED_10000baseT_Full)) !=
-	     edata->advertised)) {
-		DP_VERBOSE(edev, QED_MSG_DEBUG,
-			   "Invalid advertised capabilities %d\n",
-			   edata->advertised);
-		return -EINVAL;
-	}
-#endif
 
-	//if (edata->advertised & ADVERTISED_1000baseT_Full)
-	//	params.eee.adv_caps = QED_EEE_1G_ADV;
-	//if (edata->advertised & ADVERTISED_10000baseT_Full)
-	//	params.eee.adv_caps |= QED_EEE_10G_ADV;
-
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 9, 1))
 	if (linkmode_test_bit(ETHTOOL_LINK_MODE_1000baseT_Full_BIT, edata->advertised))
 		params.eee.adv_caps = QED_EEE_1G_ADV;
 	if (linkmode_test_bit(ETHTOOL_LINK_MODE_10000baseT_Full_BIT, edata->advertised))
 		params.eee.adv_caps = QED_EEE_10G_ADV;
-#else
-	if (edata->advertised & ADVERTISED_1000baseT_Full)
-		params.eee.adv_caps = QED_EEE_1G_ADV;
-	if (edata->advertised & ADVERTISED_10000baseT_Full)
-		params.eee.adv_caps |= QED_EEE_10G_ADV;
-#endif
 	params.eee.enable = edata->eee_enabled;
 	params.eee.tx_lpi_enable = edata->tx_lpi_enabled;
 	params.eee.tx_lpi_timer = edata->tx_lpi_timer;

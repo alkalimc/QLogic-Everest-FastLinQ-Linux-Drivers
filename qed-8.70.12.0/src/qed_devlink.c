@@ -195,9 +195,17 @@ static int qed_dl_param_get_iwarp_cmt(struct devlink *dl, u32 id,
 	return 0;
 }
 
+//static int qed_dl_param_set_iwarp_cmt(struct devlink *dl, u32 id,
+//				      struct devlink_param_gset_ctx *ctx)
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 10, 1))
 static int qed_dl_param_set_iwarp_cmt(struct devlink *dl, u32 id,
 				      struct devlink_param_gset_ctx *ctx,
 			    	  struct netlink_ext_ack *extack)
+#else
+static int qed_dl_param_set_iwarp_cmt(struct devlink *dl, u32 id,
+				      struct devlink_param_gset_ctx *ctx)
+#endif
 {
 	struct qed_devlink *qed_dl = devlink_priv(dl);
 	struct qed_dev *cdev;

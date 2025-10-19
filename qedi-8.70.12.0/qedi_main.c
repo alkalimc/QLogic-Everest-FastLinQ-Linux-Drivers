@@ -30,6 +30,10 @@
 #include "qedi_gbl.h"
 #include "qedi_iscsi.h"
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 9, 1))
+#include <linux/prandom.h>
+#endif
+
 static uint qedi_qed_debug;
 module_param(qedi_qed_debug, uint, S_IRUGO | S_IWUSR);
 MODULE_PARM_DESC(qedi_qed_debug, " QED debug level 0 (default)");
@@ -635,7 +639,13 @@ static int qedi_cm_alloc_mem(struct qedi_ctx *qedi)
 #if defined PRANDOM_API || PRANDOM_U32
 	port_id = prandom_u32() % QEDI_LOCAL_PORT_RANGE;
 #else
+	//port_id = random32() % QEDI_LOCAL_PORT_RANGE;
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 8, 1))
+	port_id = get_random_u32() % QEDI_LOCAL_PORT_RANGE;
+#else
 	port_id = random32() % QEDI_LOCAL_PORT_RANGE;
+#endif
 #endif
 	if (qedi_init_id_tbl(&qedi->lcl_port_tbl, QEDI_LOCAL_PORT_RANGE,
 			     QEDI_LOCAL_PORT_MIN, port_id)) {
@@ -876,6 +886,25 @@ static int qedi_set_iscsi_pf_param(struct qedi_ctx *qedi)
 	memset(&qedi->pf_params.iscsi_pf_params, 0,
 	       sizeof(qedi->pf_params.iscsi_pf_params));
 
+	//qedi->p_cpuq = pci_alloc_consistent(qedi->pdev,
+	//		qedi->num_queues * sizeof(struct qedi_glbl_q_params),
+	//		&qedi->hw_p_cpuq);
+	//if (!qedi->p_cpuq) {
+	//	QEDI_ERR(&qedi->dbg_ctx, "pci_alloc_consistent fail\n");
+	//	rval = -1;
+	//	goto err_alloc_mem;
+	//}
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 20, 1))
+	qedi->p_cpuq = dma_alloc_coherent(&qedi->pdev->dev,
+			qedi->num_queues * sizeof(struct qedi_glbl_q_params),
+			&qedi->hw_p_cpuq, GFP_KERNEL);
+	if (!qedi->p_cpuq) {
+		QEDI_ERR(&qedi->dbg_ctx, "dma_alloc_coherent fail\n");
+		rval = -1;
+		goto err_alloc_mem;
+	}
+#else
 	qedi->p_cpuq = pci_alloc_consistent(qedi->pdev,
 			qedi->num_queues * sizeof(struct qedi_glbl_q_params),
 			&qedi->hw_p_cpuq);
@@ -884,6 +913,7 @@ static int qedi_set_iscsi_pf_param(struct qedi_ctx *qedi)
 		rval = -1;
 		goto err_alloc_mem;
 	}
+#endif
 
 	rval = qedi_alloc_global_queues(qedi);
 	if (rval) {
@@ -940,8 +970,16 @@ static void qedi_free_iscsi_pf_param(struct qedi_ctx *qedi)
 
 	if (qedi->p_cpuq) {
 		size = qedi->num_queues * sizeof(struct qedi_glbl_q_params);
+		//pci_free_consistent(qedi->pdev, size, qedi->p_cpuq,
+		//		    qedi->hw_p_cpuq);
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 20, 1))
+		dma_free_coherent(&qedi->pdev->dev, size, qedi->p_cpuq,
+				    qedi->hw_p_cpuq);
+#else
 		pci_free_consistent(qedi->pdev, size, qedi->p_cpuq,
 				    qedi->hw_p_cpuq);
+#endif
 	}
 
 	qedi_free_global_queues(qedi);
@@ -4038,7 +4076,13 @@ retry_probe:
 	sp_params.drv_minor = QEDI_DRIVER_MINOR_VER;
 	sp_params.drv_rev = QEDI_DRIVER_REV_VER;
 	sp_params.drv_eng = QEDI_DRIVER_ENG_VER;
+	//strlcpy(sp_params.name, "qedi iSCSI", QED_DRV_VER_STR_SIZE);
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 8, 1))
+	strscpy(sp_params.name, "qedi iSCSI", QED_DRV_VER_STR_SIZE);
+#else
 	strlcpy(sp_params.name, "qedi iSCSI", QED_DRV_VER_STR_SIZE);
+#endif
 	rc = qedi_ops->common->slowpath_start(qedi->cdev, &sp_params);
 	if (rc) {
 		QEDI_ERR(&qedi->dbg_ctx, "Cannot start slowpath\n");
