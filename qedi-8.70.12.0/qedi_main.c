@@ -886,6 +886,25 @@ static int qedi_set_iscsi_pf_param(struct qedi_ctx *qedi)
 	memset(&qedi->pf_params.iscsi_pf_params, 0,
 	       sizeof(qedi->pf_params.iscsi_pf_params));
 
+	//qedi->p_cpuq = pci_alloc_consistent(qedi->pdev,
+	//		qedi->num_queues * sizeof(struct qedi_glbl_q_params),
+	//		&qedi->hw_p_cpuq);
+	//if (!qedi->p_cpuq) {
+	//	QEDI_ERR(&qedi->dbg_ctx, "pci_alloc_consistent fail\n");
+	//	rval = -1;
+	//	goto err_alloc_mem;
+	//}
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 20, 1))
+	qedi->p_cpuq = dma_alloc_coherent(&qedi->pdev->dev,
+			qedi->num_queues * sizeof(struct qedi_glbl_q_params),
+			&qedi->hw_p_cpuq, GFP_KERNEL);
+	if (!qedi->p_cpuq) {
+		QEDI_ERR(&qedi->dbg_ctx, "dma_alloc_coherent fail\n");
+		rval = -1;
+		goto err_alloc_mem;
+	}
+#else
 	qedi->p_cpuq = pci_alloc_consistent(qedi->pdev,
 			qedi->num_queues * sizeof(struct qedi_glbl_q_params),
 			&qedi->hw_p_cpuq);
@@ -894,6 +913,7 @@ static int qedi_set_iscsi_pf_param(struct qedi_ctx *qedi)
 		rval = -1;
 		goto err_alloc_mem;
 	}
+#endif
 
 	rval = qedi_alloc_global_queues(qedi);
 	if (rval) {
