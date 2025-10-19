@@ -130,6 +130,7 @@ enum qedf_ioreq_event {
 #define FCOE_FCP_RSP_FLAGS_FCP_RESID_OVER	(0x1<<2)
 #define FCOE_FCP_RSP_FLAGS_FCP_RESID_UNDER	(0x1<<3)
 //#define CMD_SCSI_STATUS(Cmnd)			((Cmnd)->SCp.Status)
+
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 16, 1))
 #define CMD_SCSI_STATUS(Cmnd)			((struct scsi_pointer *)scsi_cmd_priv(Cmnd))->Status
 #else
