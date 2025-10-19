@@ -173,8 +173,8 @@ QED_FILES := Module.symvers qed_if.h qed_fcoe_if.h qed_ll2_if.h qed_chain.h qed_
 build: build_pre
 	make -C $(KVER_DIR)/build -j$(NPROCS) M=`pwd` modules
 
-$(QED_FILES): $(addprefix ../qed-8.70.12.0/src/,$(QED_FILES))
-	cp -f ../qed-8.70.12.0/src/$@ .
+#$(QED_FILES): $(addprefix ../qed-8.70.12.0/src/,$(QED_FILES))
+#	cp -f ../qed-8.70.12.0/src/$@ .
 
 build_pre: $(QED_FILES)
 
