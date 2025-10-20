@@ -485,7 +485,7 @@ static inline void *qed_chain_consume(struct qed_chain *p_chain)
  *
  * Resets the chain to its start state
  *
- * @param p_chain pointer to a previously allocted chain
+ * @param p_chain pointer to a previously allocated chain
  */
 static inline void qed_chain_reset(struct qed_chain *p_chain)
 {
