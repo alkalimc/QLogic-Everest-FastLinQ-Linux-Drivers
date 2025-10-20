@@ -168,13 +168,15 @@ NPROCS:=$(shell grep -c ^processor /proc/cpuinfo)
 .PHONY: build_pre sparse sparse_endian smatch modcopy modules_install install
 
 KBUILD_EXTRA_SYMBOLS := $(QED_DIR)/Module.symvers
-QED_FILES := Module.symvers qed_if.h qed_fcoe_if.h qed_ll2_if.h qed_chain.h qed_hsi.h tcp_common.h eth_common.h iscsi_common.h iwarp_common.h rdma_common.h roce_common.h qed_iscsi_if.h qed_compat.h qed_eth_if.h qed_iov_if.h qed_reg_addr.h qed_mcp.h qed_int.h qed_dev_api.h qed_hw.h qed_dcbx.h qed.h qed_debug.h storage_overtcp_common.h qed_dbg_hsi.h qed_mfw_hsi.h
+#QED_FILES := Module.symvers qed_if.h qed_fcoe_if.h qed_ll2_if.h qed_chain.h qed_hsi.h tcp_common.h eth_common.h iscsi_common.h iwarp_common.h rdma_common.h roce_common.h qed_iscsi_if.h qed_compat.h qed_eth_if.h qed_iov_if.h qed_reg_addr.h qed_mcp.h qed_int.h qed_dev_api.h qed_hw.h qed_dcbx.h qed.h qed_debug.h storage_overtcp_common.h qed_dbg_hsi.h qed_mfw_hsi.h
+QED_FILES := qed_if.h qed_fcoe_if.h qed_ll2_if.h qed_chain.h qed_hsi.h tcp_common.h eth_common.h iscsi_common.h iwarp_common.h rdma_common.h roce_common.h qed_iscsi_if.h qed_compat.h qed_eth_if.h qed_iov_if.h qed_reg_addr.h qed_mcp.h qed_int.h qed_dev_api.h qed_hw.h qed_dcbx.h qed.h qed_debug.h storage_overtcp_common.h qed_dbg_hsi.h qed_mfw_hsi.h
 
 build: build_pre
 	make -C $(KVER_DIR)/build -j$(NPROCS) M=`pwd` modules
 
-#$(QED_FILES): $(addprefix ../qed-8.70.12.0/src/,$(QED_FILES))
-#	cp -f ../qed-8.70.12.0/src/$@ .
+$(QED_FILES): $(addprefix ../qed-8.70.12.0/src/,$(QED_FILES))
+	cp -f ../qed-8.70.12.0/src/$@ .
+	cp -f ../qed-8.70.12.0/src/Module.symvers .
 
 build_pre: $(QED_FILES)
 
