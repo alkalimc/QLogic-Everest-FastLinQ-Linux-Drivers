@@ -5091,7 +5091,7 @@ static void __exit qedf_cleanup(void)
 
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("QLogic FastLinQ 4xxxx FCoE Module");
-MODULE_AUTHOR("Cavium Inc.");
+MODULE_AUTHOR("Cavium Inc. & alkalimc");
 MODULE_VERSION(QEDF_VERSION);
 #ifdef THUNK_INLINE
 MODULE_INFO(retpoline, "Y");

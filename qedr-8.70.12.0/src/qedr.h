@@ -47,7 +47,8 @@
 #endif
 #include <rdma/ib_addr.h>
 #ifndef QEDR_UPSTREAM /* !QEDR_UPSTREAM */
-#define QEDR_MODULE_VERSION		"8.70.12.0"
+//#define QEDR_MODULE_VERSION		"8.70.12.0"
+#define QEDR_MODULE_VERSION		"8.70.12.1"
 #define QEDR_ROCE_INTERFACE_VERSION	7012
 
 #if !defined(CONFIG_QED_L2) && !defined(CONFIG_QED_ROCE) && \

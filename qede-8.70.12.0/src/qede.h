@@ -84,7 +84,8 @@ extern bool numa_native;
 #define QEDE_MAJOR_VERSION		8
 #define QEDE_MINOR_VERSION		70
 #define QEDE_REVISION_VERSION		12
-#define QEDE_ENGINEERING_VERSION	0
+//#define QEDE_ENGINEERING_VERSION	0
+#define QEDE_ENGINEERING_VERSION	1
 #define DRV_MODULE_VERSION __stringify(QEDE_MAJOR_VERSION) "."	\
 		__stringify(QEDE_MINOR_VERSION) "."		\
 		__stringify(QEDE_REVISION_VERSION) "." 		\
