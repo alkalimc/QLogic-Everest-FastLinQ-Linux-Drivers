@@ -20140,7 +20140,7 @@ static ssize_t qed_sysfs_cmd_write(const char __user * buffer,
 				   const struct qed_func_lookup *lookup,
 				   int num_funcs, bool from_user, bool is_hsi,
 				   bool is_tests,
-				   struct bin_attribute *bin_attr)
+				   const struct bin_attribute *bin_attr)
 {
 	enum dbg_status rc = 100;
 	struct qed_hwfn *p_hwfn;
