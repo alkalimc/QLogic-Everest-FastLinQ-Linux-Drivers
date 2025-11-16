@@ -21439,6 +21439,83 @@ qed_debugfs_fileops(all_data);
 
 #ifdef _HAS_SYSFS_BIN_ATTR_INIT
 #ifndef QED_UPSTREAM		/* ! QED_UPSTREAM */
+// static ssize_t sysfs_show(struct file *filp, struct kobject *kobp,
+// 			  struct bin_attribute *bin_attr, char *buf,
+// 			  loff_t pos, size_t count)
+// {
+// 	struct qed_dev *cdev = (struct qed_dev *)bin_attr->private;
+// 	char *data = NULL;
+// 	int len = 0;
+
+// 	if (strcmp(bin_attr->attr.name, "tests") == 0) {
+// 		if (cdev->test_result_available) {
+// 			data = (char *)&cdev->test_result;
+// 			len = sizeof(cdev->test_result);
+// 		} else {
+// 			data = (char *)tests_list;
+// 			len = strlen(tests_list);
+// 		}
+// 		len = memory_read_from_buffer(buf, count, &pos, data, len);
+// 		if (len == 0)
+// 			cdev->test_result_available = false;
+// 	}
+
+// 	if (strcmp(bin_attr->attr.name, "phy") == 0) {
+// 		if (p_phy_result_buf != NULL) {
+// 			data = p_phy_result_buf;
+// 			len = strlen(p_phy_result_buf);
+// 		} else {
+// 			data = (char *)phy_list;
+// 			len = strlen(phy_list);
+// 		}
+// 		len = memory_read_from_buffer(buf, count, &pos, data, len);
+// 		if (len == 0) {
+// 			kfree(p_phy_result_buf);
+// 			p_phy_result_buf = NULL;
+// 		}
+// 	}
+// 	return len;
+// }
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 16, 1))
+static ssize_t sysfs_show(struct file *filp, struct kobject *kobp,
+			  const struct bin_attribute *bin_attr, char *buf,
+			  loff_t pos, size_t count)
+{
+	struct qed_dev *cdev = (struct qed_dev *)bin_attr->private;
+	char *data = NULL;
+	int len = 0;
+
+	if (strcmp(bin_attr->attr.name, "tests") == 0) {
+		if (cdev->test_result_available) {
+			data = (char *)&cdev->test_result;
+			len = sizeof(cdev->test_result);
+		} else {
+			data = (char *)tests_list;
+			len = strlen(tests_list);
+		}
+		len = memory_read_from_buffer(buf, count, &pos, data, len);
+		if (len == 0)
+			cdev->test_result_available = false;
+	}
+
+	if (strcmp(bin_attr->attr.name, "phy") == 0) {
+		if (p_phy_result_buf != NULL) {
+			data = p_phy_result_buf;
+			len = strlen(p_phy_result_buf);
+		} else {
+			data = (char *)phy_list;
+			len = strlen(phy_list);
+		}
+		len = memory_read_from_buffer(buf, count, &pos, data, len);
+		if (len == 0) {
+			kfree(p_phy_result_buf);
+			p_phy_result_buf = NULL;
+		}
+	}
+	return len;
+}
+#else
 static ssize_t sysfs_show(struct file *filp, struct kobject *kobp,
 			  struct bin_attribute *bin_attr, char *buf,
 			  loff_t pos, size_t count)
@@ -21476,7 +21553,67 @@ static ssize_t sysfs_show(struct file *filp, struct kobject *kobp,
 	}
 	return len;
 }
+#endif
 
+// static ssize_t sysfs_store(struct file *filp, struct kobject *kobj,
+// 			   struct bin_attribute *bin_attr, char *buf,
+// 			   loff_t pos, size_t count)
+// {
+// 	if (strcmp(bin_attr->attr.name, "tests") == 0) {
+// 		return qed_sysfs_cmd_write(buf, count, &pos,
+// 					   qed_tests_func_lookup,
+// 					   TESTS_NUM_STR_FUNCS,
+// 					   true /* from user */ ,
+// 					   false /* not an dbg hsi function */ ,
+// 					   true /* tests function */ ,
+// 					   bin_attr);
+// 	}
+// 	if (strcmp(bin_attr->attr.name, "phy") == 0) {
+// 		if (p_phy_result_buf == NULL)
+// 			p_phy_result_buf = kzalloc(sizeof(char) *
+// 						   MAX_PHY_RESULT_BUFFER,
+// 						   GFP_KERNEL);
+// 		return qed_sysfs_cmd_write(buf, count, &pos,
+// 					   qed_phy_func_lookup,
+// 					   PHY_NUM_STR_FUNCS,
+// 					   true /* from user */ ,
+// 					   false /* not a dbg hsi function */ ,
+// 					   false /* not a tests function */ ,
+// 					   bin_attr);
+// 	}
+// 	return 0;
+// }
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 16, 1))
+static ssize_t sysfs_store(struct file *filp, struct kobject *kobj,
+			   const struct bin_attribute *bin_attr, char *buf,
+			   loff_t pos, size_t count)
+{
+	if (strcmp(bin_attr->attr.name, "tests") == 0) {
+		return qed_sysfs_cmd_write(buf, count, &pos,
+					   qed_tests_func_lookup,
+					   TESTS_NUM_STR_FUNCS,
+					   true /* from user */ ,
+					   false /* not an dbg hsi function */ ,
+					   true /* tests function */ ,
+					   bin_attr);
+	}
+	if (strcmp(bin_attr->attr.name, "phy") == 0) {
+		if (p_phy_result_buf == NULL)
+			p_phy_result_buf = kzalloc(sizeof(char) *
+						   MAX_PHY_RESULT_BUFFER,
+						   GFP_KERNEL);
+		return qed_sysfs_cmd_write(buf, count, &pos,
+					   qed_phy_func_lookup,
+					   PHY_NUM_STR_FUNCS,
+					   true /* from user */ ,
+					   false /* not a dbg hsi function */ ,
+					   false /* not a tests function */ ,
+					   bin_attr);
+	}
+	return 0;
+}
+#else
 static ssize_t sysfs_store(struct file *filp, struct kobject *kobj,
 			   struct bin_attribute *bin_attr, char *buf,
 			   loff_t pos, size_t count)
@@ -21505,6 +21642,7 @@ static ssize_t sysfs_store(struct file *filp, struct kobject *kobj,
 	}
 	return 0;
 }
+#endif
 #endif
 #endif
 
