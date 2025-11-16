@@ -473,6 +473,8 @@ ifneq ($(shell awk '/struct pci_msi_desc.{/,/^}/'  $(LINUXSRC)/include/linux/msi
         override EXTRA_CFLAGS += -D_PCI_MSI_DESC_HAS_MASK_BASE
 endif
 
+ccflags-y += $(EXTRA_CFLAGS)
+
 all default: $(obj-m)
 
 candidate: $(SOURCES)
