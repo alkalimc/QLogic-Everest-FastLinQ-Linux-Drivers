@@ -149,11 +149,18 @@ qed_fw_fatal_reporter_recover(struct devlink_health_reporter *reporter,
 	return 0;
 }
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 18, 1))
+#define QED_REPORTER_FW_GRACEFUL_PERIOD 0
+#endif
+
 static const struct devlink_health_reporter_ops qed_fw_fatal_reporter_ops = {
 		.name = "fw_fatal",
 		.recover = qed_fw_fatal_reporter_recover,
 #ifdef _HAS_DEVLINK_DUMP /* QEDE_UPSTREAM */
 		.dump = qed_fw_fatal_reporter_dump,
+#endif
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 18, 1))
+		.default_graceful_period = QED_REPORTER_FW_GRACEFUL_PERIOD,
 #endif
 };
 
@@ -163,8 +170,15 @@ void qed_fw_reporters_create(struct devlink *devlink)
 {
 	struct qed_devlink *dl = devlink_priv(devlink);
 
+	// dl->fw_reporter = devlink_health_reporter_create(devlink, &qed_fw_fatal_reporter_ops,
+	// 						 QED_REPORTER_FW_GRACEFUL_PERIOD, dl);
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 18, 1))
+	dl->fw_reporter = devlink_health_reporter_create(devlink,
+		&qed_fw_fatal_reporter_ops, dl);
+#else
 	dl->fw_reporter = devlink_health_reporter_create(devlink, &qed_fw_fatal_reporter_ops,
 							 QED_REPORTER_FW_GRACEFUL_PERIOD, dl);
+#endif
 	if (IS_ERR(dl->fw_reporter)) {
 		DP_NOTICE(dl->cdev, "Failed to create fw reporter, err = %ld\n",
 			  PTR_ERR(dl->fw_reporter));
