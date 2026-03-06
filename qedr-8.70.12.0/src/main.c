@@ -61,7 +61,7 @@
 #include "qedr_roce_cm.h"
 
 MODULE_DESCRIPTION("QLogic 40G/100G ROCE Driver");
-MODULE_AUTHOR("Cavium Inc");
+MODULE_AUTHOR("Cavium Inc & alkalimc");
 MODULE_LICENSE("Dual BSD/GPL");
 
 #ifndef QEDR_UPSTREAM /* !QEDR_UPSTREAM*/

@@ -4546,7 +4546,7 @@ static void __exit qedi_cleanup(void)
 
 MODULE_DESCRIPTION("QLogic FastLinQ 4xxxx iSCSI Module");
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("QLogic Corporation");
+MODULE_AUTHOR("QLogic Corporation & alkalimc");
 MODULE_VERSION(QEDI_MODULE_VERSION);
 #ifdef THUNK_INLINE
 MODULE_INFO(retpoline, "Y");

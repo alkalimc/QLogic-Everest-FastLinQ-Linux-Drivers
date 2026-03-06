@@ -74,7 +74,8 @@
 #define QED_MAJOR_VERSION               8
 #define QED_MINOR_VERSION               70
 #define QED_REVISION_VERSION            12
-#define QED_ENGINEERING_VERSION 0
+//#define QED_ENGINEERING_VERSION 0
+#define QED_ENGINEERING_VERSION         1
 
 #define QED_VERSION						 \
 	((QED_MAJOR_VERSION << 24) | (QED_MINOR_VERSION << 16) | \

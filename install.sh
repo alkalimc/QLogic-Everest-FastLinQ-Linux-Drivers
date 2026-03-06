@@ -1,8 +1,8 @@
 #!/bin/bash
 #
 # https://github.com/alkalimc/QLogic-Everest-FastLinQ-Linux-Drivers
-# Powered by alkali
-# Copyright 2025- alkali. All Rights Reserved.
+# Powered by alkalimc
+# Copyright 2025- alkalimc. All Rights Reserved.
 ################################################################
 
 KERNEL_VER=$(uname -r)

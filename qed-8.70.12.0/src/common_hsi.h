@@ -139,7 +139,8 @@
 #define FW_MAJOR_VERSION                8
 #define FW_MINOR_VERSION                70
 #define FW_REVISION_VERSION             4
-#define FW_ENGINEERING_VERSION  0
+//#define FW_ENGINEERING_VERSION  0
+#define FW_ENGINEERING_VERSION          1
 
 /***********************/
 /* COMMON HW CONSTANTS */

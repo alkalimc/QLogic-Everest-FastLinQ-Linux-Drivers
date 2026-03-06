@@ -52,6 +52,9 @@
 #include <linux/spinlock.h>
 #include <linux/string.h>
 #include <linux/version.h>
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 11, 1))
+#include <linux/ethtool.h>
+#endif
 #include "qed_chain.h"
 enum dcbx_protocol_type {
 	DCBX_PROTOCOL_ISCSI,
